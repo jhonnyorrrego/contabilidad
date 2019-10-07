@@ -32,19 +32,22 @@ function guardar_ingreso_egreso(){
     $tipo  = "'2'";//Egreso
   } else if(@$_REQUEST["grupo"] == 4){
     $tipo  = "'3'";//Traslado
-  }  else if(@$_REQUEST["grupo"] == 5){
+  } else if(@$_REQUEST["grupo"] == 5){
     $tipo  = "'4'";//Bolsillo
+  } else if(@$_REQUEST["grupo"] == 6){
+    $tipo  = "'5'";//Saldo inicial Bolsillo
   }
   
-  if(@$_REQUEST["tipo_pago"] == 3){//Si tipo de pago es bolsillo, obtengo el bolsillo a seleccionar
+  if(@$_REQUEST["tipo_pago"] == 3 || @$_REQUEST["grupo"] == 6){//Si tipo de pago es bolsillo o si grupo es saldo inicial bolsillo, obtengo el bolsillo a seleccionar
     $bolsillo = "'" . @$_REQUEST["bolsillo"] . "'";
   }
   
   if(@$_REQUEST["categoria"] == -1){
-    $campoCategoria = array('nombre', 'fk_idemp', 'fecha_creacion', 'fk_idusu');
+    $campoCategoria = array('nombre', 'fk_idemp','fk_idgru', 'fecha_creacion', 'fk_idusu');
     $valoresCategoria = array();
     $valoresCategoria[] = "'" . @$_REQUEST["otra_categoria"] . "'";
     $valoresCategoria[] = $empresa;
+    $valoresCategoria[] = $grupo;
     $valoresCategoria[] = "date_format('" . $fechaHoy . "', '%Y-%m-%d %H:%i:%s')";
     $valoresCategoria[] = $fk_idusu;
     
@@ -56,7 +59,7 @@ function guardar_ingreso_egreso(){
     }
   }
   
-  $campos_insertar = array('fk_idemp', 'fecha', 'grupo', 'fk_idcat', 'concepto', 'valor', 'tipo', 'tipo_pago', 'fecha_creacion', 'fk_idusu', 'fk_idbol');
+  $campos_insertar = array('fk_idemp', 'fecha', 'fk_idgru', 'fk_idcat', 'concepto', 'valor', 'tipo', 'tipo_pago', 'fecha_creacion', 'fk_idusu', 'fk_idbol');
   $valores_insertar = array();
   $valores_insertar[] = $empresa;
   $valores_insertar[] = "date_format('" . $fecha . "', '%Y-%m-%d')";
@@ -82,11 +85,6 @@ function guardar_ingreso_egreso(){
 
 function mostrar_actualizar_ingreso_egreso_formulario(){
   global $conexion;
-  $grupo1 = '';
-  $grupo2 = '';
-  $grupo3 = '';
-  $grupo4 = '';
-  $grupo5 = '';
   $tipoPago1 = '';
   $tipoPago2 = '';
   $tipoPago3 = '';
@@ -99,24 +97,9 @@ function mostrar_actualizar_ingreso_egreso_formulario(){
   $iding = @$_REQUEST["iding"];
   $sql1 = "select * from ingreso_egreso where iding=" . $iding;
   $datos = $conexion -> listar_datos($sql1);
-  $categorias = obtener_categorias($datos[0]["fk_idemp"],$datos[0]["fk_idcat"],1);
+  $categorias = obtener_categorias($datos[0]["fk_idemp"],$datos[0]["fk_idgru"],$datos[0]["fk_idcat"],1);
   $bolsillos = obtener_bolsillos($datos[0]["fk_idemp"],$datos[0]["fk_idbol"],1);
-  
-  if($datos[0]["grupo"] == 1){
-    $grupo1 = 'checked';
-  }
-  if($datos[0]["grupo"] == 2){
-    $grupo2 = 'checked';
-  }
-  if($datos[0]["grupo"] == 3){
-    $grupo3 = 'checked';
-  }
-  if($datos[0]["grupo"] == 4){
-    $grupo4 = 'checked';
-  }
-  if($datos[0]["grupo"] == 5){
-    $grupo5 = 'checked';
-  }
+  $grupos = $conexion -> obtener_grupos($datos[0]["fk_idgru"],'grupo_edit',1);
   
   if($datos[0]["tipo_pago"] == 1){
     $tipoPago1 = 'checked';
@@ -148,35 +131,7 @@ function mostrar_actualizar_ingreso_egreso_formulario(){
             </div>
             <div class="form-group col-md-2">
               <label>Grupo*</label>
-                <div class="form-check form-check-primary">
-                  <label class="form-check-label">
-                    <input type="radio" class="form-check-input" name="grupo_edit" id="grupo1" value="1" ' . $grupo1 . '>
-                    Ingreso
-                  <i class="input-helper"></i></label>
-                </div>
-                <div class="form-check form-check-primary">
-                  <label class="form-check-label">
-                    <input type="radio" class="form-check-input" name="grupo_edit" id="grupo12" value="2" ' . $grupo2 . '>
-                    Gastos operativos
-                  <i class="input-helper"></i></label>
-                </div>
-                <div class="form-check form-check-primary">
-                  <label class="form-check-label">
-                    <input type="radio" class="form-check-input" name="grupo_edit" id="grupo3" value="3" ' . $grupo3 . '>
-                    Gastos externos
-                  <i class="input-helper"></i></label>
-                </div>
-                <div class="form-check form-check-primary">
-                  <label class="form-check-label">
-                    <input type="radio" class="form-check-input" name="grupo_edit" id="grupo4" value="4" ' . $grupo4 . '>
-                    Traslado
-                  <i class="input-helper"></i></label>
-                </div>
-                <div class="form-check form-check-primary">
-                  <label class="form-check-label">
-                    <input type="radio" class="form-check-input" name="grupo_edit" id="grupo5" value="5" ' . $grupo5 . '>
-                    Gastos bolsillo
-                  <i class="input-helper"></i></label>
+                <div id="capa_edit_grupo">' . $grupos["opciones_adicionar"] . '
                 </div>
             </div>
             
@@ -280,9 +235,11 @@ function actualizar_ingreso_egreso_formulario(){
     $tipo  = "3";//Traslado
   } else if(@$_REQUEST["grupo"] == 5){
     $tipo  = "4";//Bolsillo
+  } else if(@$_REQUEST["grupo"] == 6){
+    $tipo  = "5";//Saldo inicial Bolsillo
   }
   
-  if(@$_REQUEST["tipo_pago"] == 3){//Si tipo de pago es bolsillo, obtengo el bolsillo a seleccionar
+  if(@$_REQUEST["tipo_pago"] == 3 || @$_REQUEST["grupo"] == 6){//Si tipo de pago es bolsillo o grupo es saldo inicial bolsillo, obtengo el bolsillo a seleccionar
     $bolsillo = @$_REQUEST["bolsillo"];
   }
   
@@ -308,7 +265,7 @@ function actualizar_ingreso_egreso_formulario(){
   $valoresModificar = array();
   $valoresModificar[] = "fk_idemp='" . $empresa . "'";
   $valoresModificar[] = "fecha=date_format('" . $fecha . "', '%Y-%m-%d')";
-  $valoresModificar[] = "grupo='" . $grupo . "'";
+  $valoresModificar[] = "fk_idgru='" . $grupo . "'";
   $valoresModificar[] = "fk_idcat='" . $categoria . "'";
   $valoresModificar[] = "concepto='" . $concepto . "'";
   $valoresModificar[] = "valor='" . $valor . "'";
@@ -348,26 +305,66 @@ function obtener_listas(){
   
   $empresa = @$_REQUEST["empresa"];
   
-  $opcionesCategoria = obtener_categorias($empresa,'',1);
   $opcionesBolsillo = obtener_bolsillos($empresa,'',1);
   
-  $retorno["opciones_categoria"] = $opcionesCategoria["opciones"];
   $retorno["opciones_bolsillo"] = $opcionesBolsillo["opciones"];
   
   echo(json_encode($retorno));
 }
-function obtener_categorias($empresa=false,$seleccionado=false,$return = 0){
+
+function obtener_listas_categorias(){
+  global $conexion, $atras;
+  $retorno = array();
+  $retorno["exito"] = 1;
+  
+  $empresa = @$_REQUEST["empresa"];
+  $grupo = @$_REQUEST["grupo"];
+  
+  if($empresa && $grupo){
+    $opcionesCategorias = obtener_categorias($empresa, $grupo, '',1);
+    $retorno["opciones_categoria"] = $opcionesCategorias["opciones"];
+  } else {
+    $retorno["exito"] = 0;
+    $retorno["mensaje"] = '';
+  }
+  
+  echo(json_encode($retorno));
+}
+function obtener_listas_categorias_filtro(){
+  global $conexion, $atras;
+  $retorno = array();
+  $retorno["exito"] = 1;
+  
+  $empresa = @$_REQUEST["empresa"];
+  $grupo = @$_REQUEST["grupo"];
+  
+  if($empresa && $grupo){
+    $opcionesCategoriasFiltro = obtener_categorias_filtro($empresa, $grupo, '',1);
+    $retorno["opciones_categoria"] = $opcionesCategoriasFiltro["opciones"];
+  } else {
+    $retorno["exito"] = 0;
+    $retorno["mensaje"] = '';
+  }
+  
+  echo(json_encode($retorno));
+}
+function obtener_categorias($empresa=false,$grupo=false,$seleccionado=false,$return = 0){
     global $conexion, $atras;
     $adicional = '';
         
     $retorno = array();
+    $where = array();
+    
     $retorno["exito"] = 1;
     
-    if(@$_REQUEST["empresa"]){
-      $empresa = @$_REQUEST["empresa"];
+    if(@$empresa){
+      $where[] = " AND a.fk_idemp=" . $empresa;
+    }
+    if(@$grupo){
+      $where[] = " AND a.fk_idgru=" . $grupo;
     }
     
-    $sql1 = "select a.idcat, a.nombre from categoria a where a.fk_idemp=" . $empresa . " and a.estado=1";
+    $sql1 = "select a.idcat, a.nombre from categoria a where a.estado=1 " . implode("", $where) . "";
     $datos = $conexion -> listar_datos($sql1);
     
     if($datos["cant_resultados"]){
@@ -386,7 +383,47 @@ function obtener_categorias($empresa=false,$seleccionado=false,$return = 0){
     } else {
       $retorno["exito"] = 0;
       $retorno["mensaje"] = "No existen categorías relacionadas a esta empresa";
-      $retorno["opciones"] = "<option value=''>Seleccione</option>";
+      $retorno["opciones"] = "<option value=''>Seleccione</option><option value='-1'>Otro</option>";
+    }
+    
+    if($return == 0){
+      echo(json_encode($retorno));
+    } else {
+      return($retorno);
+    }
+}
+function obtener_categorias_filtro($empresa=false,$grupo=false,$seleccionado=false,$return = 0){
+    global $conexion, $atras;
+    $adicional = '';
+        
+    $retorno = array();
+    $where = array();
+    
+    $retorno["exito"] = 1;
+    
+    if(@$empresa){
+      $where[] = " AND a.fk_idemp=" . $empresa;
+    }
+    if(@$grupo){
+      $where[] = " AND a.fk_idgru in(" . $grupo . ")";
+    }
+    
+    $sql1 = "select a.idcat, a.nombre from categoria a where a.estado=1 " . implode("", $where) . " order by a.nombre asc";
+    $datos = $conexion -> listar_datos($sql1);
+    
+    if($datos["cant_resultados"]){
+      $html = "";
+      for ($i=0; $i < $datos["cant_resultados"]; $i++) {
+        $html .= '<div class="form-check form-check-primary">
+                    <label class="form-check-label">
+                      <input type="checkbox" class="form-check-input" name="categoria_filtro[]" id="categoria_filtro' . $datos[$i]["idcat"] . '" value="' . $datos[$i]["idcat"] . '">
+                      ' . $datos[$i]["nombre"] . '
+                    <i class="input-helper"></i></label>
+                  </div>';
+      }
+      $retorno["opciones"] = $html;
+    } else {
+      $retorno["exito"] = 0;
     }
     
     if($return == 0){
@@ -434,49 +471,6 @@ function obtener_bolsillos($empresa=false,$seleccionado=false,$return = 0){
       return($retorno);
     }
 }
-function obtener_grupos($empresa=false,$seleccionado=false,$return = 0){
-  global $conexion;
-  $adicional = '';
-        
-  $retorno = array();
-  $retorno["exito"] = 1;
-  
-  if(@$_REQUEST["empresa"]){
-    $empresa = @$_REQUEST["empresa"];
-  }
-  
-  $sql1 = "select a.idgru, a.nombre from grupo a where a.fk_idemp=" . $empresa . " and a.estado=1";
-  $datos = $conexion -> listar_datos($sql1);
-  
-  if($datos["cant_resultados"]){
-    $html = "";
-    for ($i=0; $i < $datos["cant_resultados"]; $i++) {
-      $adicional = '';
-      if($seleccionado && $datos[$i]["idgru"] == $seleccionado){
-        $adicional = 'checked';
-      }
-       
-      $html .= '<div class="form-check form-check-primary">
-                    <label class="form-check-label">
-                      <input type="radio" class="form-check-input " name="grupo" id="grupo' . $datos[$i]["idgru"] . '" value="' . $datos[$i]["idgru"] . '" ' . $adicional . '>
-                      Ingreso
-                    <i class="input-helper"></i></label>
-                  </div>';
-    }
-    //$html .= "<option value='-1'>Otro</option>";
-    $retorno["opciones"] = $html;
-  } else {
-    $retorno["exito"] = 0;
-    $retorno["mensaje"] = "No existen grupos relacionadas a esta empresa";
-    $retorno["opciones"] = "<option value=''>Seleccione</option>";
-  }
-  
-  if($return == 0){
-    echo(json_encode($retorno));
-  } else {
-    return($retorno);
-  }
-}
 
 if(@$_REQUEST["ejecutar"]){
   $_REQUEST["ejecutar"]();
@@ -498,6 +492,7 @@ function obtener_gastos_ingresos_egresos(){
   $saldoInicialBanco = 0;//Suma de los valores en banco cuando categoria es saldo inicial
   $totalBolsillo1 = 0;//Total del bolsillo a sumar y a restar del saldo total
   $totalBolsillo2 = 0;//Total del bolsillo a restar
+  $totalBolsillo3 = 0;//Saldo inicial del bolsillo
   $bolsillos = array();
   
   $capa1Show = '';
@@ -536,7 +531,7 @@ function obtener_gastos_ingresos_egresos(){
     $capa2Show = 'show active';
   }
   
-  $sql = "select a.iding,b.nombre as empresa,a.fecha,a.grupo,c.nombre as categoria,a.concepto,a.valor,a.tipo,a.tipo_pago,a.fk_idbol from ingreso_egreso a, empresa b, categoria c where a.estado=1 and a.fk_idemp=b.idemp and a.fk_idcat=c.idcat " . implode("",$whereFiltro) . " " . $order;
+  $sql = "select a.iding,b.nombre as empresa,a.fecha,d.idgru as grupo,c.nombre as categoria,a.concepto,a.valor,a.tipo,a.tipo_pago,a.fk_idbol from ingreso_egreso a, empresa b, categoria c, grupo d where a.estado=1 and a.fk_idemp=b.idemp and a.fk_idcat=c.idcat and a.fk_idgru=d.idgru " . implode("",$whereFiltro) . " " . $order;
   $datos = $conexion -> listar_datos($sql);
   
   for ($i=0; $i < $datos["cant_resultados"]; $i++) {
@@ -567,13 +562,17 @@ function obtener_gastos_ingresos_egresos(){
       $trasladoRestaEfectivo += $datos[$i]["valor"];//Saldo a restar en efectivo si tipo de pago es banco
       $trasladoSumaBanco += $datos[$i]["valor"];//Saldo a sumar a banco
     } else if($datos[$i]["tipo_pago"] == 3 && $datos[$i]["grupo"] == 2){//Si tipo de pago es bolsillo y grupo es gastos operativos, sumo al bolsillo seleccionado y resto al saldo total
-      //$bolsillos[$datos[$i]["fk_idbol"]] += $datos[$i]["valor"];
+      $bolsillos[$datos[$i]["fk_idbol"]] += $datos[$i]["valor"];
       
       $totalBolsillo1 += $datos[$i]["valor"];
     } else if($datos[$i]["tipo_pago"] == 3 && $datos[$i]["grupo"] == 5){//Si tipo de pago es bolsillo y grupo gastos bolsillo, se resta del bolsillo
-      //$bolsillos[$datos[$i]["fk_idbol"]] -= $datos[$i]["valor"];
+      $bolsillos[$datos[$i]["fk_idbol"]] -= $datos[$i]["valor"];
       
       $totalBolsillo2 += $datos[$i]["valor"];
+    } else if($datos[$i]["grupo"] == 6){//Si tipo es bolsillo y grupo es saldo inicial bolsillo, sumo al bolsillo seleccionado
+      $bolsillos[$datos[$i]["fk_idbol"]] += $datos[$i]["valor"];
+      
+      $totalBolsillo3 += $datos[$i]["valor"];
     }
   }
 
@@ -594,14 +593,13 @@ function obtener_gastos_ingresos_egresos(){
     $totalEfectivo -= $trasladoRestaEfectivo;
   }
   
-  if($saldoInicialEfectivo > 0){
-    $totalEfectivo += $saldoInicialEfectivo;
-  }
+  $totalEfectivo += $saldoInicialEfectivo - $totalBolsillo1;
+  
   if($saldoInicialBanco > 0){
     $totalBanco += $saldoInicialBanco;
   }
   
-  $totalBolsillos = $totalBolsillo1 - $totalBolsillo2;
+  $totalBolsillos = ($totalBolsillo1 - $totalBolsillo2) + $totalBolsillo3;
   
   $saldoTotal = ((($ingresoEfectivo + $ingresoBanco) - ($egresoEfectivo + $egresoBanco)) + $saldoInicialEfectivo + $saldoInicialBanco) - $totalBolsillo1;
   
@@ -657,15 +655,32 @@ function obtener_gastos_ingresos_egresos(){
             </div>
           </div>
           <div class="tab-pane fade ' . $capa2Show . '" id="capa_bolsillos" role="tabpanel" aria-labelledby="capa_bolsillos-tab">
-            <div class="d-flex flex-wrap justify-content-xl-between">
-                <div class="d-flex flex-grow-1 align-items-center justify-content-center p-3 item">
-                  <i class="mdi mdi-currency-usd mr-3 icon-lg text-danger"></i>
-                  <div class="d-flex flex-column justify-content-around">
-                    <small class="mb-1 text-muted">Saldo total bolsillos</small>
-                    <h5 class="mr-2 mb-0">$' . number_format($totalBolsillos,0,",",".") . '</h5>
+            <div class="row">
+              <div class="d-flex flex-wrap justify-content-xl-between col-md-12 border-md-bottom">
+                  <div class="d-flex flex-grow-1 align-items-center justify-content-center p-3 item">
+                    <i class="mdi mdi-currency-usd mr-3 icon-lg text-danger"></i>
+                    <div class="d-flex flex-column justify-content-around">
+                      <small class="mb-1 text-muted">Saldo total bolsillos</small>
+                      <h5 class="mr-2 mb-0">$' . number_format($totalBolsillos,0,",",".") . '</h5>
+                    </div>
                   </div>
-                </div>
-            </div>
+              </div>';
+  
+  foreach($bolsillos as $indice => $valor){
+    $sqlBolsillo = "select idbol, nombre from bolsillo where idbol=" . $indice;
+    $datosBolsillo = $conexion -> listar_datos($sqlBolsillo);
+    $html .= '<div class="d-flex flex-wrap justify-content-xl-between col-md-3">
+                  <div class="d-flex flex-grow-1 align-items-center justify-content-center p-3 item">
+                    <i class="mdi mdi-currency-usd mr-3 icon-lg text-danger"></i>
+                    <div class="d-flex flex-column justify-content-around">
+                      <small class="mb-1 text-muted">' . $datosBolsillo[0]["nombre"] . '</small>
+                      <h5 class="mr-2 mb-0">$' . number_format($valor,0,",",".") . '</h5>
+                    </div>
+                  </div>
+              </div>';
+  }
+              
+            $html .= '</div>
           </div>';
               
   $retorno["html"] = $html;

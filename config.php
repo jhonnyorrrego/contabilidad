@@ -29,7 +29,7 @@ if (!defined("LLAVE_SESION")){
 	define("LLAVE_SESION", "CONTABILIDAD");
 }
 
-ini_set("display_errors",true);
+ini_set("display_errors",false);
 ini_set("safe_mode",false);
 
 //Constantes predefinidas MYSQL

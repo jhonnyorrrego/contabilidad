@@ -63,6 +63,11 @@ $(document).on('click', "#actualizar_ingreso_egreso_formulario", function(){
         notificacion('Por favor llenar los campos obligatorios','warning',4000);
         return false;
       }
+  } else if(x_grupo == 6){//Si grupo es saldo inicial bolsillo
+      if(!x_empresa || !x_fecha || !x_grupo || (!x_valor || x_valor == 0) || !x_bolsillo){
+        notificacion('Por favor llenar los campos obligatorios','warning',4000);
+        return false;
+      }
   } else {
     if(!x_empresa || !x_fecha || !x_grupo || !x_categoria || (!x_valor || x_valor == 0)){
       notificacion('Por favor llenar los campos obligatorios','warning',4000);
@@ -146,6 +151,7 @@ $(document).on('change', '#categoria_edit', function(){
   
 $(document).on('click', "input[name$='grupo_edit']", function(){
   procesar_grupo_edit();
+  procesar_categorias_edit();
 });
 
 function procesar_grupo_edit(){
@@ -157,12 +163,40 @@ function procesar_grupo_edit(){
     $("#capa_tipo_pago_edit").hide();
     
     $("#capa_traslado_a_edit").show();
+  } else if(x_valor == 6){//Saldo inicial bolsillo
+      //$("#capa_adicionar_categoria").hide();
+      $("#capa_concepto_edit").hide();
+      $("#capa_tipo_pago_edit").hide();
+      
+      $("#capa_bolsillo_edit").show();
   } else {
     $("#capa_traslado_a_edit").hide();
     
     $("#capa_categoria_edit").show();
     $("#capa_concepto_edit").show();
     $("#capa_tipo_pago_edit").show();
+  }
+}
+
+function procesar_categorias_edit(){
+  var x_empresa = $("#empresa").val();
+  var x_grupo = $('input:radio[name=grupo_edit]:checked').val();
+  
+  if(x_empresa && x_grupo){
+    $.ajax({
+      url: 'ejecutar_acciones.php',
+      type: 'POST',
+      dataType: 'json',
+      async: false,
+      data: {empresa: x_empresa, grupo: x_grupo, ejecutar: 'obtener_listas_categorias'},
+      success : function(respuesta){
+        if(respuesta.exito){
+          $("#categoria_edit").html(respuesta.opciones_categoria);
+        } else {
+          $("#categoria_edit").html("<option value=''>Seleccione</option><option value='-1'>Otro</option>");
+        }
+      }
+    });
   }
 }
 

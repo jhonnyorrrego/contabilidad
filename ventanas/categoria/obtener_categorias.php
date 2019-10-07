@@ -21,9 +21,11 @@ $hoy = date('Y-m-d');
 
 if($campo_ordenar){
   $order .= "order by " . $campo_ordenar . " " . $asc_desc;
+} else {
+  $order .= "order by idcat desc";
 }
 
-$sql = "select idcat,nombre,fk_idemp,estado from categoria where 1=1 " . implode("",$where_contenedor) . " " . $order;
+$sql = "select a.idcat,a.nombre,a.fk_idemp,d.nombre as grupo,a.estado from categoria a, grupo d where a.fk_idgru=d.idgru " . implode("",$where_contenedor) . " " . $order;
 $datos = $conexion -> listar_datos($sql,$inicio,$cantidad);
 
 $arreglo = array();
@@ -37,8 +39,10 @@ $arreglo["total"] = $datos_cantidad[0]["cantidad"];
 //----------------
 
 for($i=0;$i<$datos["cant_resultados"];$i++){
+  $datos[$i]["nombre"] = $conexion -> mayuscula($datos[$i]["nombre"]);
+  $datos[$i]["grupo"] = $conexion -> mayuscula($datos[$i]["grupo"]);
   $datos[$i]["acciones_categoria"]=(acciones_categoria($datos[$i]["idcat"]));
-  $datos[$i]["empresa_vinculada"]=(empresa_vinculada($datos[$i]["fk_idemp"]));
+  $datos[$i]["empresa_vinculada"]= $conexion -> mayuscula(empresa_vinculada($datos[$i]["fk_idemp"]));
   $datos[$i]["estado_funcion"]=(estado_funcion($datos[$i]["estado"]));
 }
 //----------------

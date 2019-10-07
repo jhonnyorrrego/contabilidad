@@ -22,13 +22,13 @@ class lib_gym{
 		}
 		$res=mysqli_query($this->con,$consulta);
 		$cantidad=0;
-		while($result = mysqli_fetch_array($res,MYSQL_ASSOC)){
+		while(@$result = mysqli_fetch_array($res,MYSQL_ASSOC)){
 			array_push($retorno,$result);
 			$cantidad++;
 		}
 		$retorno["sql"]=$consulta;
 		$retorno["cant_resultados"]=$cantidad;
-		mysqli_free_result($res);
+		//mysqli_free_result($res);
 		return($retorno);
 	}
 	/*Inserta en base de datos segun los parametros recibidos
@@ -100,6 +100,68 @@ class lib_gym{
 			return(false);
 		}
 	}
+  
+  public function obtener_listas_grupos(){
+    global $conexion, $atras;
+    $retorno = array();
+    $retorno["exito"] = 1;
+    
+    $opcionesGrupos = $this -> obtener_grupos('grupo',1);
+    
+    $retorno["opciones_grupo"] = $opcionesGrupos["opciones_adicionar"];
+    $retorno["opciones_grupo_filtro"] = $opcionesGrupos["opciones_filtro"];
+    
+    echo(json_encode($retorno));
+  }
+  public function obtener_grupos($seleccionado=false,$name = 'grupo',$return = 0){
+  global $conexion;
+  $adicional = '';
+  $htmlAdicionar = "";
+  $htmlFiltro = "";
+        
+  $retorno = array();
+  $retorno["exito"] = 1;
+  
+  $sql1 = "select a.idgru, a.nombre from grupo a where a.estado=1";
+  $datos = $conexion -> listar_datos($sql1);
+  
+  if($datos["cant_resultados"]){    
+    for ($i=0; $i < $datos["cant_resultados"]; $i++) {
+      $adicional = '';
+      if($seleccionado && $datos[$i]["idgru"] == $seleccionado){
+        $adicional = 'checked';
+      } else if(!$seleccionado && $datos[$i]["idgru"] == 1){
+        $adicional = 'checked';
+      }
+       
+      $htmlAdicionar .= '<div class="form-check form-check-primary">
+                    <label class="form-check-label">
+                      <input type="radio" class="form-check-input " name="' . $name . '" id="' . $name . $datos[$i]["idgru"] . '" value="' . $datos[$i]["idgru"] . '" ' . $adicional . '>
+                      ' . $datos[$i]["nombre"] . '
+                    <i class="input-helper"></i></label>
+                  </div>';
+      $htmlFiltro .= '<div class="form-check form-check-primary">
+                    <label class="form-check-label">
+                      <input type="checkbox" class="form-check-input ' . $name . '_filtro" name="' . $name . '_filtro[]" id="' . $name . $datos[$i]["idgru"] . '" value="' . $datos[$i]["idgru"] . '">
+                      ' . $datos[$i]["nombre"] . '
+                    <i class="input-helper"></i></label>
+                  </div>';
+    }
+    //$html .= "<option value='-1'>Otro</option>";
+    $retorno["opciones_adicionar"] = $htmlAdicionar;
+    $retorno["opciones_filtro"] = $htmlFiltro;
+  } else {
+    $retorno["exito"] = 0;
+    $retorno["mensaje"] = "No existen grupos relacionadas a esta empresa";
+    $retorno["opciones"] = "<option value=''>Seleccione</option>";
+  }
+  
+  if($return == 0){
+    echo(json_encode($retorno));
+  } else {
+    return($retorno);
+  }
+}
 	/*
 	Funcion encargada en obtener opciones de listas desplegables de campos que esten en formatos
 

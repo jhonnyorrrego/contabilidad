@@ -99,6 +99,16 @@ for ($i=0; $i < $empresas["cant_resultados"]; $i++) {
                   </select>
               </div>
               
+              <div class="form-group col-md-2">
+              <label>Grupo*</label>
+                <div id="capa_adicionar_grupo">
+<?php
+$cadenaGrupo = $conexion -> obtener_grupos('','grupo',1);
+echo($cadenaGrupo["opciones_adicionar"]);
+?>
+                </div>
+            </div>
+              
               <div class="col-md-3 form-group">
                   <label class="">Estado*</label>
                   <select class="form-control form-control-sm required" id="estado" name="estado">
@@ -129,6 +139,7 @@ for ($i=0; $i < $empresas["cant_resultados"]; $i++) {
               <tr>
                 <th data-field="nombre" data-sortable="true" data-visible="true">Nombre</th>
                 <th data-field="empresa_vinculada" data-sortable="false" data-visible="true">Empresa vinculada</th>
+                <th data-field="grupo" data-sortable="true" data-visible="true">Grupo</th>
                 <th data-field="estado_funcion" data-sortable="false" data-visible="true">Estado</th>
                 <th data-field="acciones_categoria" data-sortable="false" data-visible="true"></th>
               </tr>
@@ -260,6 +271,10 @@ $.fn.serializeObject = function(){
     });
     return o;
 };
+
+$(".redimensionar").click(function(){
+     setTimeout(function(){ $('#table').bootstrapTable('resetWidth'); }, 500);
+  });
 </script>
 <?php echo(pie()); ?>
 <?php include_once($atras . "ventanas/categoria/librerias_reporte_categoria_js.php"); ?>

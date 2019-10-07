@@ -1,20 +1,4 @@
 <?php
-function obtener_grupo($grupo){
-  $cadena = '';
-  if($grupo == 1){
-    $cadena = 'INGRESO';
-  } else if($grupo == 2){
-    $cadena = 'GASTOS OPERATIVOS';
-  } else if($grupo == 3){
-    $cadena = 'GASTOS EXTERNOS';
-  } else if($grupo == 4){
-    $cadena = 'TRASLADO';
-  } else if($grupo == 5){
-    $cadena = 'GASTOS BOLSILLO';
-  }
-  
-  return($cadena);
-}
 function obtener_tipo($tipo){
   $cadena = '';
   if($tipo == 1){

@@ -29,16 +29,16 @@ if(@$_REQUEST["empresa"]){
   $where_contenedor[] = ' and a.fk_idemp=';
 }
 if(@$_REQUEST["fechai"]){
-  $where_contenedor[] = " and date_format(a.fecha,'%Y-%m-%d %H:%i:%s')>='" . $_REQUEST["fechai"] . "'";
+  $where_contenedor[] = " and date_format(a.fecha,'%Y-%m-%d')>='" . $_REQUEST["fechai"] . "'";
 }
 if(@$_REQUEST["fechaf"]){
-  $where_contenedor[] = " and date_format(a.fecha,'%Y-%m-%d %H:%i:%s')<='" . $_REQUEST["fechaf"] . "'";
+  $where_contenedor[] = " and date_format(a.fecha,'%Y-%m-%d')<='" . $_REQUEST["fechaf"] . "'";
 }
 if(@$_REQUEST["grupo_filtro"]){
-  $where_contenedor[] = ' and a.grupo in (' . implode(",",@$_REQUEST["grupo_filtro"]) . ')';
+  $where_contenedor[] = ' and a.fk_idgru in (' . implode(",",@$_REQUEST["grupo_filtro"]) . ')';
 }
 if(@$_REQUEST["categoria_filtro"]){
-  $where_contenedor[] = ' and a.fk_idcat in (' . $_REQUEST["categoria_filtro"] . ')';
+  $where_contenedor[] = ' and a.fk_idcat in (' . implode(",",@$_REQUEST["categoria_filtro"]) . ')';
 }
 if(@$_REQUEST["bolsillo_filtro"]){
   $where_contenedor[] = ' and a.fk_idbol in (' . $_REQUEST["bolsillo_filtro"] . ')';
@@ -59,23 +59,23 @@ if($campo_ordenar){
   $order .= "order by fecha asc";
 }
 
-$sql = "select a.iding,b.nombre as empresa,a.fecha,a.grupo,c.nombre as categoria,a.concepto,a.valor,a.tipo,a.tipo_pago,a.fk_idbol from ingreso_egreso a, empresa b, categoria c where a.estado=1 and a.fk_idemp=b.idemp and a.fk_idcat=c.idcat " . implode("",$where_contenedor) . " " . $order;
+$sql = "select a.iding,b.nombre as empresa,date_format(a.fecha,'%Y-%m-%d') as fecha,c.nombre as categoria,d.nombre as grupo,a.concepto,a.valor,a.tipo,a.tipo_pago,a.fk_idbol from ingreso_egreso a, empresa b, categoria c, grupo d where a.estado=1 and a.fk_idemp=b.idemp and a.fk_idcat=c.idcat and a.fk_idgru=d.idgru " . implode("",$where_contenedor) . " " . $order;
 $datos = $conexion -> listar_datos($sql,$inicio,$cantidad);
 
 $arreglo = array();
 
 //Obteniendo el total de registros de la consulta
-$sql_cantidad = "select count(*) as cantidad from ingreso_egreso a, empresa b, categoria c where a.estado=1 and a.fk_idemp=b.idemp and a.fk_idcat=c.idcat " . implode("",$where_contenedor);
+$sql_cantidad = "select count(*) as cantidad from ingreso_egreso a, empresa b, categoria c, grupo d where a.estado=1 and a.fk_idemp=b.idemp and a.fk_idcat=c.idcat and a.fk_idgru=d.idgru " . implode("",$where_contenedor);
 $datos_cantidad = $conexion -> listar_datos($sql_cantidad);
 $arreglo["sql"] = $sql_cantidad;
-$arreglo["total"] = $datos_cantidad[0]["cantidad"];
+$arreglo["total"] = @$datos_cantidad[0]["cantidad"];
 //-----
 
 //----------------
 
 for($i=0;$i<$datos["cant_resultados"];$i++){
   $datos[$i]["categoria"] = $conexion -> mayuscula($datos[$i]["categoria"]);
-  $datos[$i]["grupo"]=(obtener_grupo($datos[$i]["grupo"]));
+  $datos[$i]["grupo"]=($conexion -> mayuscula($datos[$i]["grupo"]));
   $datos[$i]["valor"]=(parsear_valor_ingreso_egreso($datos[$i]["valor"],$datos[$i]["tipo"]));
   $datos[$i]["tipo"]=(obtener_tipo($datos[$i]["tipo"]));
   $datos[$i]["tipo_pago"]=(obtener_tipo_pago($datos[$i]["tipo_pago"]));

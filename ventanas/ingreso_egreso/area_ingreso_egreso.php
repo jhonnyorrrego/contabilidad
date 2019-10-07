@@ -59,8 +59,13 @@ $(document).ready(function(){
         notificacion('Por favor llenar los campos obligatorios','warning',4000);
         return false;
       }
-    } else if(x_tipo_pago == 3){//Si tipo de pago es bolsillo
+    } else if(x_tipo_pago == 3){//Si tipo de pago es bolsillo y grupo es gastos bolsillo
       if(!x_empresa || !x_fecha || !x_grupo || !x_categoria || (!x_valor || x_valor == 0) || !x_bolsillo){
+        notificacion('Por favor llenar los campos obligatorios','warning',4000);
+        return false;
+      }
+    } else if(x_grupo == 6){//Si grupo es saldo inicial bolsillo
+      if(!x_empresa || !x_fecha || !x_grupo || (!x_valor || x_valor == 0) || !x_bolsillo){
         notificacion('Por favor llenar los campos obligatorios','warning',4000);
         return false;
       }
@@ -117,6 +122,9 @@ $(document).ready(function(){
     var valor = $(this).val();
     
     if(valor){
+      procesar_categorias();
+      procesar_categorias_filtro();
+      
       $.ajax({
         url: 'ejecutar_acciones.php',
         type: 'POST',
@@ -125,15 +133,11 @@ $(document).ready(function(){
         data: {ejecutar: 'obtener_listas', empresa: valor},
         success : function(respuesta){
           if(respuesta.exito){
-            //notificacion(respuesta.mensaje,'success',4000);
-            $("#categoria,#categoria_edit,#categoria_filtro").html(respuesta.opciones_categoria);
             $("#bolsillo,#bolsillo_edit,#bolsillo_filtro").html(respuesta.opciones_bolsillo);
           } else {
             notificacion(respuesta.mensaje,'warning',4000);
-            $("#categoria,#categoria_edit,#categoria_filtro").html("<option value=''>Seleccione</option><option value='-1'>Otro</option>");
             $("#bolsillo,#bolsillo_edit,#bolsillo_filtro").html("<option value=''>Seleccione</option>");
           }
-          
           procesamiento_listar();
         }
       });
@@ -154,16 +158,24 @@ $(document).ready(function(){
   $("input[name$='grupo']").click(function(){
     var x_valor = $(this).val();
     
+    procesar_categorias();
+    
     if(x_valor == 4){//Si grupo es traslado, solo necesitamos el campo valor y traslado a
-      $("#capa_categoria").hide();
+      $("#capa_adicionar_categoria").hide();
       $("#capa_concepto").hide();
       $("#capa_tipo_pago").hide();
       
       $("#capa_traslado_a").show();
+    } else if(x_valor == 6){//Saldo inicial bolsillo
+      //$("#capa_adicionar_categoria").hide();
+      $("#capa_concepto").hide();
+      $("#capa_tipo_pago").hide();
+      
+      $("#capa_bolsillo").show();
     } else {
       $("#capa_traslado_a").hide();
       
-      $("#capa_categoria").show();
+      $("#capa_adicionar_categoria").show();
       $("#capa_concepto").show();
       $("#capa_tipo_pago").show();
     }
@@ -182,6 +194,10 @@ $(document).ready(function(){
     }
   });
   
+  $(".grupo_filtro").click(function(){
+    procesar_categorias_filtro();
+  });
+  
   $(".descargar_reporte").click(function(){
     var x_empresa = $("#empresa").val();
     var x_fechaInicial = $("#fechai").val();
@@ -195,7 +211,7 @@ $(document).ready(function(){
     window.open("export_ingreso_egreso.php?empresa=" + x_empresa + "&fechai=" + x_fechaInicial + "&fechaf=" + x_fechaFinal, "_self");
   });
   
-  $('input[name$="grupo_filtro[]"],#categoria_filtro,input[name$="tipo_pago_filtro[]"],#bolsillo_filtro').change(function(){
+  $(document).on('change','input[name$="grupo_filtro[]"],input[name$="categoria_filtro[]"],input[name$="tipo_pago_filtro[]"],#bolsillo_filtro',function(){
     procesamiento_listar();
   });
   $("#concepto_filtro,#valor_filtro").keyup(function(){
@@ -205,6 +221,60 @@ $(document).ready(function(){
   });
   
 });
+
+function procesar_categorias(){
+  var x_empresa = $("#empresa").val();
+  var x_grupo = $('input:radio[name=grupo]:checked').val();
+  
+  if(x_empresa && x_grupo){
+    $.ajax({
+      url: 'ejecutar_acciones.php',
+      type: 'POST',
+      dataType: 'json',
+      async: false,
+      data: {empresa: x_empresa, grupo: x_grupo, ejecutar: 'obtener_listas_categorias'},
+      success : function(respuesta){
+        if(respuesta.exito){
+          $("#categoria").html(respuesta.opciones_categoria);
+        } else {
+          $("#categoria").html("<option value=''>Seleccione</option><option value='-1'>Otro</option>");
+        }
+      }
+    });
+  }
+}
+function procesar_categorias_filtro(){
+  var x_empresa = $("#empresa").val();
+  var x_grupo = '';
+  var x_grupoArray = new Array();
+  var indice = 0;
+  
+  $('[name="grupo_filtro[]"]:checked').each(function(){
+    x_grupoArray[indice]= $(this).val();
+    indice++;
+  });
+  
+  x_grupo = x_grupoArray.join(",");
+  
+  if(x_empresa && x_grupo){
+    $.ajax({
+      url: 'ejecutar_acciones.php',
+      type: 'POST',
+      dataType: 'json',
+      async: false,
+      data: {empresa: x_empresa, grupo: x_grupo, ejecutar: 'obtener_listas_categorias_filtro'},
+      success : function(respuesta){
+        if(respuesta.exito){
+          $("#capa_filtro_categoria").html(respuesta.opciones_categoria);
+        } else {
+          $("#capa_filtro_categoria").html("Sin opciones");
+        }
+      }
+    });
+  } else {
+    $("#capa_filtro_categoria").html("Sin opciones");
+  }
+}
 
 $(document).on('keydown', function(event) {
    if (event.key == "Escape") {
@@ -317,41 +387,15 @@ $(document).on('keydown', function(event) {
             </div>
             <div class="form-group col-md-2">
               <label>Grupo*</label>
-                <div id="capa_grupo">
-                  <div class="form-check form-check-primary">
-                    <label class="form-check-label">
-                      <input type="radio" class="form-check-input " name="grupo" id="grupo1" value="1" checked="">
-                      Ingreso
-                    <i class="input-helper"></i></label>
-                  </div>
-                  <div class="form-check form-check-primary">
-                    <label class="form-check-label">
-                      <input type="radio" class="form-check-input" name="grupo" id="grupo12" value="2">
-                      Gastos operativos
-                    <i class="input-helper"></i></label>
-                  </div>
-                  <div class="form-check form-check-primary">
-                    <label class="form-check-label">
-                      <input type="radio" class="form-check-input" name="grupo" id="grupo3" value="3">
-                      Gastos externos
-                    <i class="input-helper"></i></label>
-                  </div>
-                  <div class="form-check form-check-primary">
-                    <label class="form-check-label">
-                      <input type="radio" class="form-check-input" name="grupo" id="grupo4" value="4">
-                      Traslado
-                    <i class="input-helper"></i></label>
-                  </div>
-                  <div class="form-check form-check-primary">
-                    <label class="form-check-label">
-                      <input type="radio" class="form-check-input" name="grupo" id="grupo5" value="5">
-                      Gastos bolsillo
-                    <i class="input-helper"></i></label>
-                  </div>
+                <div id="capa_adicionar_grupo">
+<?php
+$cadenaGrupo = $conexion -> obtener_grupos('','grupo',1);
+echo($cadenaGrupo["opciones_adicionar"]);
+?>
                 </div>
             </div>
             
-            <div id="capa_categoria" class="form-group col-md-1">
+            <div id="capa_adicionar_categoria" class="form-group col-md-1">
               <label for="exampleFormControlSelect1">Categoría*</label>
               <select class="form-control form-control-sm " id="categoria">
                 <option value="">Seleccione</option>
@@ -437,43 +481,16 @@ $(document).on('keydown', function(event) {
           <form class="row" name="filtro_ingreso_egreso2" id="filtro_ingreso_egreso2" onsubmit="return false;">
             <div class="form-group col-md-2">
               <label>Grupo</label>
-                <div class="form-check form-check-primary">
-                  <label class="form-check-label">
-                    <input type="checkbox" class="form-check-input " name="grupo_filtro[]" id="grupo1" value="1">
-                    Ingreso
-                  <i class="input-helper"></i></label>
-                </div>
-                <div class="form-check form-check-primary">
-                  <label class="form-check-label">
-                    <input type="checkbox" class="form-check-input" name="grupo_filtro[]" id="grupo12" value="2">
-                    Gastos operativos
-                  <i class="input-helper"></i></label>
-                </div>
-                <div class="form-check form-check-primary">
-                  <label class="form-check-label">
-                    <input type="checkbox" class="form-check-input" name="grupo_filtro[]" id="grupo3" value="3">
-                    Gastos externos
-                  <i class="input-helper"></i></label>
-                </div>
-                <div class="form-check form-check-primary">
-                  <label class="form-check-label">
-                    <input type="checkbox" class="form-check-input" name="grupo_filtro[]" id="grupo4" value="4">
-                    Traslado
-                  <i class="input-helper"></i></label>
-                </div>
-                <div class="form-check form-check-primary">
-                  <label class="form-check-label">
-                    <input type="checkbox" class="form-check-input" name="grupo_filtro[]" id="grupo5" value="5">
-                    Gastos bolsillo
-                  <i class="input-helper"></i></label>
+                <div id="capa_filtro_grupo">
+<?php
+echo($cadenaGrupo["opciones_filtro"]);
+?>
                 </div>
             </div>
             
-            <div id="capa_categoria" class="form-group col-md-2">
+            <div id="" class="form-group col-md-2">
               <label for="exampleFormControlSelect1">Categoría</label>
-              <select class="form-control form-control-sm " name="categoria_filtro" id="categoria_filtro">
-                <option value="">Seleccione</option>
-              </select>
+              <div id="capa_filtro_categoria">Sin opciones</div>
             </div>
             
             <div id="capa_concepto" class="form-group col-md-2">
