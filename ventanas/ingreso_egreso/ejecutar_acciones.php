@@ -32,6 +32,7 @@ function guardar_ingreso_egreso(){
     $tipo  = "'2'";//Egreso
   } else if(@$_REQUEST["grupo"] == 4){
     $tipo  = "'3'";//Traslado
+    $categoria = "'-3'";
   } else if(@$_REQUEST["grupo"] == 5){
     $tipo  = "'4'";//Bolsillo
   } else if(@$_REQUEST["grupo"] == 6){
