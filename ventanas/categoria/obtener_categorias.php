@@ -19,6 +19,19 @@ $order = "";
 $where_contenedor = array();
 $hoy = date('Y-m-d');
 
+if(@$_REQUEST["fk_idemp_filtro"]){
+  $where_contenedor[] = ' and a.fk_idemp=' . $_REQUEST["fk_idemp_filtro"];
+}
+if(@$_REQUEST["nombre_filtro"]){
+  $where_contenedor[] = " and a.nombre like '%" . $_REQUEST["nombre_filtro"] . "%'";
+}
+if(@$_REQUEST["grupo_filtro"]){
+  $where_contenedor[] = ' and a.fk_idgru in (' . implode(",",@$_REQUEST["grupo_filtro"]) . ')';
+}
+if(@$_REQUEST["estado_filtro"]){
+  $where_contenedor[] = ' and a.estado in (' . implode(",",@$_REQUEST["estado_filtro"]) . ')';
+}
+
 if($campo_ordenar){
   $order .= "order by " . $campo_ordenar . " " . $asc_desc;
 } else {

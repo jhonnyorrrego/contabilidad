@@ -138,10 +138,10 @@ echo($cadenaGrupo["opciones_adicionar"]);
           <a data-toggle="collapse" href="#collapseExample" role="button" aria-expanded="false" aria-controls="collapseExample">
             + Filtros
           </a>
-        </p
+        </p>
         
         <div class="collapse" id="collapseExample">
-          <form class="row" name="filtro_categoria2" id="filtro_categoria2" onsubmit="return false;">
+          <form class="row" name="filtro_categoria" id="filtro_categoria" onsubmit="return false;">
               <div class="col-md-3 form-group">
                 <label class="">Nombre*</label>
                 <input type="text" id="nombre_filtro" name="nombre_filtro" class="form-control form-control-sm">
@@ -266,12 +266,7 @@ $(document).ready(function(){//Se inicializa la tabla con estilos, el alto del d
 });
 function procesamiento_listar(){
   var alto_documento = $(document).height();
-
-  var data = $('#form_table').serializeObject();
-  
-  $('#table').bootstrapTable('getOptions').sidePagination = 'client';
-  $('#table').bootstrapTable('selectPage', 1);
-  $('#table').bootstrapTable('getOptions').sidePagination = 'server';
+  var data = $('#filtro_categoria').serializeObject();
   
   $('#table').bootstrapTable('refreshOptions', {
     url: 'obtener_categorias.php',
@@ -300,11 +295,16 @@ function procesamiento_listar(){
       var altoTabla = $("#table").height();
 
       <?php if(@$_SESSION["dispositivo"] == 'computer'){ ?>
+      setTimeout(function(){
+        $('#table').bootstrapTable('resetView' , {height: altoTabla+100} );
+        //$(document).scrollTop( $('#capa_ingreso_egreso_list').offset().top -80 );        
+      }, 500);
       
       <?php } ?>
       <?php if(@$_SESSION["dispositivo"] == 'phone'){ ?>
       setTimeout(function(){
         $('#table').bootstrapTable('resetView' , {height: altoTabla+150} );
+        //$(document).scrollTop( $('#capa_ingreso_egreso_list').offset().top -80 );
       }, 500);
       <?php } ?>
     }
