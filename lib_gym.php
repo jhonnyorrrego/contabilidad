@@ -142,7 +142,7 @@ class lib_gym{
                   </div>';
       $htmlFiltro .= '<div class="form-check form-check-primary">
                     <label class="form-check-label">
-                      <input type="checkbox" class="form-check-input ' . $name . '_filtro" name="' . $name . '_filtro[]" id="' . $name . $datos[$i]["idgru"] . '" value="' . $datos[$i]["idgru"] . '">
+                      <input type="checkbox" class="form-check-input ' . $name . '_filtro" name="' . $name . '_filtro[]" id="' . $name . $datos[$i]["idgru"] . '" value="' . $datos[$i]["idgru"] . '" texto="' . $datos[$i]["nombre"] . '">
                       ' . $datos[$i]["nombre"] . '
                     <i class="input-helper"></i></label>
                   </div>';

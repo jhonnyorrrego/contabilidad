@@ -133,8 +133,69 @@ echo($cadenaGrupo["opciones_adicionar"]);
     <div class="card">
       <div class="card-body">
         <p class="card-title">Lista categorias</p>
+        
+        <p>
+          <a data-toggle="collapse" href="#collapseExample" role="button" aria-expanded="false" aria-controls="collapseExample">
+            + Filtros
+          </a>
+        </p
+        
+        <div class="collapse" id="collapseExample">
+          <form class="row" name="filtro_categoria2" id="filtro_categoria2" onsubmit="return false;">
+              <div class="col-md-3 form-group">
+                <label class="">Nombre*</label>
+                <input type="text" id="nombre_filtro" name="nombre_filtro" class="form-control form-control-sm">
+              </div>
+              
+              <div class="form-group col-md-3">
+                <label>Empresa</label>
+<?php
+$sql = "select idemp,nombre from empresa order by nombre asc";
+$empresas = $conexion -> listar_datos($sql);
+
+$html = '';
+for ($i=0; $i < $empresas["cant_resultados"]; $i++) {
+  $html .= '     <div class="form-check form-check-primary">
+                  <label class="form-check-label">
+                    <input type="checkbox" class="form-check-input fk_idemp_filtro" name="fk_idemp_filtro[]" id="fk_idemp_filtro' . $empresas[$i]["idemp"] . '" value="' . $empresas[$i]["idemp"] . '" texto="' . $empresas[$i]["nombre"] . '">
+                    ' . $empresas[$i]["nombre"] . '
+                  <i class="input-helper"></i></label>
+                </div>';
+}
+echo($html);
+?>
+              </div>
+              
+              <div class="form-group col-md-2">
+              <label>Grupo*</label>
+                <div id="capa_adicionar_grupo">
+<?php
+$cadenaGrupo = $conexion -> obtener_grupos('','grupo',1);
+echo($cadenaGrupo["opciones_filtro"]);
+?>
+                </div>
+            </div>
+              
+              <div class="col-md-3 form-group">
+                  <label class="">Estado*</label>                    
+                  <div class="form-check form-check-primary">
+                    <label class="form-check-label">
+                      <input type="checkbox" class="form-check-input estado_filtro" name="estado_filtro[]" id="estado_filtro1" value="1" texto="Activo">
+                      Activo
+                    <i class="input-helper"></i></label>
+                  </div>
+                  <div class="form-check form-check-primary">
+                    <label class="form-check-label">
+                      <input type="checkbox" class="form-check-input estado_filtro" name="estado_filtro[]" id="estado_filtro2" value="2" texto="Inactivo">
+                      Inactivo
+                    <i class="input-helper"></i></label>
+                  </div>
+              </div>
+          </form>
+        </div>
+        
         <div class="table-responsive">
-          <table id="table" class="table" role="grid" style="width: 100%">
+          <table id="table" class="table table-bordered table-responsive-md table-striped text-center" role="grid">
             <thead class="">
               <tr>
                 <th data-field="nombre" data-sortable="true" data-visible="true">Nombre</th>

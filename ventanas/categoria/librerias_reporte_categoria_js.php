@@ -23,6 +23,8 @@ $(document).on('click','.editar_categoria',function(){
       }
     }
   });
+  
+  $(document).scrollTop( $('#capa_categoria_edit').offset().top -80 );
 });
 $(document).on('click','#actualizar_categoria_formulario',function(){
   var formulario = $("#categoria_edit");

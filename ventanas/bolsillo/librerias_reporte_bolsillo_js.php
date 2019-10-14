@@ -23,6 +23,8 @@ $(document).on('click','.editar_bolsillo',function(){
       }
     }
   });
+  
+  $(document).scrollTop( $('#capa_bolsillo_edit').offset().top -80 );
 });
 $(document).on('click','#actualizar_bolsillo_formulario',function(){
   var formulario = $("#bolsillo_edit");

@@ -60,6 +60,8 @@ $(document).on('click','.editar_usuario',function(){
       }
     }
   });
+  
+  $(document).scrollTop( $('#capa_usuario_edit').offset().top -80 );
 });
 $(document).on('click','#actualizar_usuario_formulario',function(){
   var formulario = $("#usuario_edit");

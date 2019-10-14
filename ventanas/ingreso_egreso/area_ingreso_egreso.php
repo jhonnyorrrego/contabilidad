@@ -148,6 +148,19 @@ $(document).ready(function(){
     procesar_capa_info_ingreso_egreso();
   });
   
+  $("#ano").change(function(){
+    procesarFiltrosFechas();
+    
+    procesar_capa_info_ingreso_egreso();
+    procesamiento_listar();
+  });
+  $("#mes").change(function(){
+    procesarFiltrosFechas();
+    
+    procesar_capa_info_ingreso_egreso();
+    procesamiento_listar();
+  });
+  
   $("#categoria").change(function(){
     var valor = $(this).val();
     if(valor == -1){
@@ -198,6 +211,33 @@ $(document).ready(function(){
     procesar_categorias_filtro();
   });
   
+  $(".nav-link").click(function(){
+    var id = $(this).attr("id");
+    if(id == 'capa_datos-tab'){
+      
+    } else if(id == 'capa_bolsillos-tab'){
+      $(".grupo_filtro").each(function(){
+        var texto = $(this).attr("texto");
+        if(texto.toLocaleLowerCase().indexOf('bolsillo') != -1){
+          $(this).attr("checked","checked");
+        } else {
+          $(this).prop("checked",false);
+        }
+      });
+      
+      $(".tipo_pago_filtro").each(function(){
+        var texto = $(this).attr("texto");
+        if(texto.toLocaleLowerCase().indexOf('bolsillo') != -1){
+          $(this).attr("checked","checked");
+        } else {
+          $(this).prop("checked",false);
+        }
+      });
+    }
+    
+    procesamiento_listar();
+  });
+  
   $(".descargar_reporte").click(function(){
     var x_empresa = $("#empresa").val();
     var x_fechaInicial = $("#fechai").val();
@@ -242,6 +282,24 @@ function procesar_categorias(){
       }
     });
   }
+}
+function procesarFiltrosFechas(){
+  var ano = $("#ano").val();
+  var mes = $("#mes").val() - 1;
+  
+  if(!ano){
+    return false;
+  }
+  
+  var date = new Date(ano,mes,1);
+  var primerDia = new Date(date.getFullYear(), date.getMonth(), 1);
+  var ultimoDia = new Date(date.getFullYear(), date.getMonth() + 1, 0);  
+  
+  var fechaInicial = primerDia.getFullYear().toString() + '-' + str_pad(((primerDia.getMonth() + 1).toString()),2,'0','STR_PAD_LEFT') + '-' + str_pad((primerDia.getDate().toString()),2,'0','STR_PAD_LEFT');
+  var fechaFinal = ultimoDia.getFullYear().toString() + '-' + str_pad(((ultimoDia.getMonth() + 1).toString()),2,'0','STR_PAD_LEFT') + '-' + str_pad((ultimoDia.getDate().toString()),2,'0','STR_PAD_LEFT');
+  
+  $("#fechai").val(fechaInicial);
+  $("#fechaf").val(fechaFinal);
 }
 function procesar_categorias_filtro(){
   var x_empresa = $("#empresa").val();
@@ -336,17 +394,45 @@ $(document).on('keydown', function(event) {
               <option value="-1">Todos</option>
             </select>
           </div>
+            
+          <div class="form-group col-md-6">
+            <label>Año</label>
+            <select name="ano" id="ano" class="form-control form-control-sm">
+              <option value="">Seleccione</option>
+<?php
+$adicional = '';
+$sql1 = "select date_format(fecha,'%Y') as ano from ingreso_egreso where estado=1 group by date_format(fecha,'%Y') order by ano desc";
+$datosAno = $conexion -> listar_datos($sql1);
+for($i=0;$i<$datosAno["cant_resultados"];$i++){
+  $adicional = '';
+  if(date('Y') == $datosAno[$i]["ano"]){
+    $adicional = 'selected';
+  }
+  echo('<option value="' . $datosAno[$i]["ano"] . '" ' . $adicional . '>' . $datosAno[$i]["ano"] . '</option>');
+}
+?>
+            </select>
+          </div>
           
           <div class="form-group col-md-6">
-            <label>Fecha inicial</label>
-            <!--input type="text" class="form-control form-control-lg" placeholder="Username" aria-label="Username"-->
-            <input type="text" class="form-control form-control-sm " name="fechai" id="fechai" readonly="" value="<?php echo($fechai); ?>">
+            <label>Mes</label>
+            <select name="mes" id="mes" class="form-control form-control-sm">
+<?php
+$adicional = '';
+for($i=0;$i<12;$i++){
+  $adicional = '';
+  if(date('m') == ($i + 1)){
+    $adicional = 'selected';
+  }
+  //echo('<option value="' . str_pad(($i + 1),2,'0',STR_PAD_LEFT) . '" ' . $adicional . '>' . ucwords($conexion -> mes($i + 1)) . '</option>');
+  echo('<option value="' . ($i + 1) . '" ' . $adicional . '>' . ucwords($conexion -> mes($i + 1)) . '</option>');
+}
+?>
+            </select>
           </div>
-          <div class="form-group col-md-6">
-            <label>Fecha final</label>
-            <!--input type="text" class="form-control form-control-lg" placeholder="Username" aria-label="Username"-->
-            <input type="text" class="form-control form-control-sm " name="fechaf" id="fechaf" readonly="" value="<?php echo($fechaf); ?>">
-          </div>
+          
+          <input type="hidden" class="form-control form-control-sm " name="fechai" id="fechai" readonly="" value="<?php echo($fechai); ?>">
+          <input type="hidden" class="form-control form-control-sm " name="fechaf" id="fechaf" readonly="" value="<?php echo($fechaf); ?>">
         
         </form>
       </div>
@@ -506,19 +592,19 @@ echo($cadenaGrupo["opciones_filtro"]);
               <label>Tipo de pago</label>
                 <div class="form-check form-check-primary">
                   <label class="form-check-label">
-                    <input type="checkbox" class="form-check-input" name="tipo_pago_filtro[]" id="tipo_pago1" value="1">
+                    <input type="checkbox" class="form-check-input tipo_pago_filtro" name="tipo_pago_filtro[]" id="tipo_pago1" value="1" texto="Efectivo">
                     Efectivo
                   <i class="input-helper"></i></label>
                 </div>
                 <div class="form-check form-check-primary">
                   <label class="form-check-label">
-                    <input type="checkbox" class="form-check-input" name="tipo_pago_filtro[]" id="tipo_pago2" value="2">
+                    <input type="checkbox" class="form-check-input tipo_pago_filtro" name="tipo_pago_filtro[]" id="tipo_pago2" value="2" texto="Banco">
                     Banco
                   <i class="input-helper"></i></label>
                 </div>
                 <div class="form-check form-check-primary">
                   <label class="form-check-label">
-                    <input type="checkbox" class="form-check-input" name="tipo_pago_filtro[]" id="tipo_pago3" value="3">
+                    <input type="checkbox" class="form-check-input tipo_pago_filtro" name="tipo_pago_filtro[]" id="tipo_pago3" value="3" texto="Bolsillo">
                     Bolsillo
                   <i class="input-helper"></i></label>
                 </div>

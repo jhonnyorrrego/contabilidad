@@ -37,9 +37,13 @@ function obtener_bolsillo($idbol){
   
   return($cadena);
 }
-function parsear_valor_ingreso_egreso($valor,$tipo){
+function parsear_valor_ingreso_egreso($valor,$tipo,$categoria){
   $cadena = '';
-  $cadena .= '<button type="button" class="btn btn-outline-primary valores" tipo="' . $tipo . '">' . number_format($valor,0,",",".") . "</button>";
+  if(strpos(strtolower($categoria), 'saldo inicial') !== false){
+    $cadena .= '<button type="button" class="btn btn-outline-primary" tipo="' . $tipo . '">' . number_format($valor,0,",",".") . "</button>";
+  } else {
+    $cadena .= '<button type="button" class="btn btn-outline-primary valores" tipo="' . $tipo . '">' . number_format($valor,0,",",".") . "</button>";
+  }
   return($cadena);
 }
 function accion_ingreso_egreso($iding){

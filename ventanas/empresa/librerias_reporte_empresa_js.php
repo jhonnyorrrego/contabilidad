@@ -23,6 +23,8 @@ $(document).on('click','.editar_empresa',function(){
       }
     }
   });
+  
+  $(document).scrollTop( $('#capa_empresa_edit').offset().top -80 );
 });
 $(document).on('click','#actualizar_empresa_formulario',function(){
   var formulario = $("#empresa_edit");

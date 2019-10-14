@@ -36,6 +36,8 @@ $(document).on('click','.editar_ingreso_egreso',function(){
       }
     }
   });
+  
+  $(document).scrollTop( $('#capa_ingreso_egreso_edit').offset().top -80 );
 });
 
 $(document).on('click', "#actualizar_ingreso_egreso_formulario", function(){
