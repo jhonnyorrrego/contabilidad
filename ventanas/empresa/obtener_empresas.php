@@ -19,11 +19,24 @@ $order = "";
 $where_contenedor = array();
 $hoy = date('Y-m-d');
 
+if(@$_REQUEST["nombre_filtro"]){
+  $where_contenedor[] = " and a.nombre like '%" . $_REQUEST["nombre_filtro"] . "%'";
+}
+if(@$_REQUEST["nit_filtro"]){
+  $where_contenedor[] = " and a.nit like '%" . $_REQUEST["nit_filtro"] . "%'";
+}
+if(@$_REQUEST["tipo_filtro"]){
+  $where_contenedor[] = ' and a.tipo in (' . implode(",",@$_REQUEST["tipo_filtro"]) . ')';
+}
+if(@$_REQUEST["estado_filtro"]){
+  $where_contenedor[] = ' and a.estado in (' . implode(",",@$_REQUEST["estado_filtro"]) . ')';
+}
+
 if($campo_ordenar){
   $order .= "order by " . $campo_ordenar . " " . $asc_desc;
 }
 
-$sql = "select idemp,nombre,nit,tipo,estado from empresa where 1=1 " . implode("",$where_contenedor) . " " . $order;
+$sql = "select idemp,nombre,nit,tipo,estado from empresa a where 1=1 " . implode("",$where_contenedor) . " " . $order;
 $datos = $conexion -> listar_datos($sql,$inicio,$cantidad);
 
 $arreglo = array();

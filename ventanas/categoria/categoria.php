@@ -58,6 +58,15 @@ $().ready(function() {
       });
     }
   });
+  
+  $(document).on('change','input[name$="grupo_filtro[]"],input[name$="fk_idemp_filtro[]"],input[name$="estado_filtro[]"]',function(){
+    procesamiento_listar();
+  });
+  $("#nombre_filtro").keyup(function(){
+    setTimeout(function(){
+      procesamiento_listar();
+    }, 100);
+  });
 });
 </script>
 
@@ -143,7 +152,7 @@ echo($cadenaGrupo["opciones_adicionar"]);
         <div class="collapse" id="collapseExample">
           <form class="row" name="filtro_categoria" id="filtro_categoria" onsubmit="return false;">
               <div class="col-md-3 form-group">
-                <label class="">Nombre*</label>
+                <label class="">Nombre</label>
                 <input type="text" id="nombre_filtro" name="nombre_filtro" class="form-control form-control-sm">
               </div>
               
@@ -167,7 +176,7 @@ echo($html);
               </div>
               
               <div class="form-group col-md-2">
-              <label>Grupo*</label>
+              <label>Grupo</label>
                 <div id="capa_adicionar_grupo">
 <?php
 $cadenaGrupo = $conexion -> obtener_grupos('','grupo',1);
@@ -177,7 +186,7 @@ echo($cadenaGrupo["opciones_filtro"]);
             </div>
               
               <div class="col-md-3 form-group">
-                  <label class="">Estado*</label>                    
+                  <label class="">Estado</label>                    
                   <div class="form-check form-check-primary">
                     <label class="form-check-label">
                       <input type="checkbox" class="form-check-input estado_filtro" name="estado_filtro[]" id="estado_filtro1" value="1" texto="Activo">
@@ -216,7 +225,7 @@ echo($cadenaGrupo["opciones_filtro"]);
 <script>
 $body = $("body");
 
-var cantidad_registros = 10;
+var cantidad_registros = 1000;
 $(document).ready(function(){//Se inicializa la tabla con estilos, el alto del documento y se ejecuta la accion para listar datos sobre la tabla
   var alto_documento = $(document).height();
   var alto_tabla = <?php echo($alto_tabla); ?>;
@@ -334,8 +343,8 @@ $.fn.serializeObject = function(){
 };
 
 $(".redimensionar").click(function(){
-     setTimeout(function(){ $('#table').bootstrapTable('resetWidth'); }, 500);
-  });
+   setTimeout(function(){ $('#table').bootstrapTable('resetWidth'); }, 500);
+});
 </script>
 <?php echo(pie()); ?>
 <?php include_once($atras . "ventanas/categoria/librerias_reporte_categoria_js.php"); ?>

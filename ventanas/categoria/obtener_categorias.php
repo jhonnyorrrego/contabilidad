@@ -20,7 +20,7 @@ $where_contenedor = array();
 $hoy = date('Y-m-d');
 
 if(@$_REQUEST["fk_idemp_filtro"]){
-  $where_contenedor[] = ' and a.fk_idemp=' . $_REQUEST["fk_idemp_filtro"];
+  $where_contenedor[] = ' and a.fk_idemp in (' . implode(",",$_REQUEST["fk_idemp_filtro"]) . ')';
 }
 if(@$_REQUEST["nombre_filtro"]){
   $where_contenedor[] = " and a.nombre like '%" . $_REQUEST["nombre_filtro"] . "%'";
@@ -44,7 +44,7 @@ $datos = $conexion -> listar_datos($sql,$inicio,$cantidad);
 $arreglo = array();
 
 //Obteniendo el total de registros de la consulta
-$sql_cantidad = "select count(*) as cantidad from categoria where 1=1 " . implode("",$where_contenedor);
+$sql_cantidad = "select count(*) as cantidad from categoria a, grupo d where a.fk_idgru=d.idgru " . implode("",$where_contenedor);
 $datos_cantidad = $conexion -> listar_datos($sql_cantidad);
 $arreglo["total"] = $datos_cantidad[0]["cantidad"];
 //-----

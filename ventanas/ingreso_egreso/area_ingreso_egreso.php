@@ -683,7 +683,7 @@ $(document).ready(function(){
 });
 $body = $("body");
 
-var cantidad_registros = 60;
+var cantidad_registros = 1000;
 $(document).ready(function(){//Se inicializa la tabla con estilos, el alto del documento y se ejecuta la accion para listar datos sobre la tabla
   var alto_documento = $(document).height();
   var alto_tabla = <?php echo($alto_tabla); ?>;
