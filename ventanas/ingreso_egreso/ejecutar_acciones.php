@@ -42,6 +42,14 @@ function guardar_ingreso_egreso(){
   if(@$_REQUEST["tipo_pago"] == 3 || @$_REQUEST["grupo"] == 6){//Si tipo de pago es bolsillo o si grupo es saldo inicial bolsillo, obtengo el bolsillo a seleccionar
     $bolsillo = "'" . @$_REQUEST["bolsillo"] . "'";
   }
+
+  $consultaCierreMes = validarCierreMes($empresa,$fecha);  
+  if($consultaCierreMes["exito"]){//Existe un cierre y no debe dejar registrar
+    $retorno["exito"] = 0;
+    $retorno["mensaje"] = 'Este mes ya se encuentra cerrado';
+    echo(json_encode($retorno));
+    die();
+  }
   
   if(@$_REQUEST["categoria"] == -1){
     $campoCategoria = array('nombre', 'fk_idemp','fk_idgru', 'fecha_creacion', 'fk_idusu');
@@ -82,6 +90,22 @@ function guardar_ingreso_egreso(){
   }
   
   echo(json_encode($retorno));
+}
+
+function validarCierreMes($empresa,$fecha){
+  global $conexion;
+  $retorno = array();
+  $retorno["exito"] = 0;
+  
+  $datosFecha = explode("-",$fecha);
+  
+  $sqlConsultaCierre = "select * from cierre_mes a where a.fk_idemp=" . $empresa . " and a.ano=" . $datosFecha[0] . " and a.mes=" . intval($datosFecha[1]) . "";  
+  $datosConsultaCierre = $conexion -> listar_datos($sqlConsultaCierre);
+  
+  if($datosConsultaCierre["cant_resultados"]){
+    $retorno["exito"] = 1;
+  }  
+  return($retorno);
 }
 
 function mostrar_actualizar_ingreso_egreso_formulario(){
@@ -242,6 +266,14 @@ function actualizar_ingreso_egreso_formulario(){
   
   if(@$_REQUEST["tipo_pago"] == 3 || @$_REQUEST["grupo"] == 6){//Si tipo de pago es bolsillo o grupo es saldo inicial bolsillo, obtengo el bolsillo a seleccionar
     $bolsillo = @$_REQUEST["bolsillo"];
+  }
+  
+  $consultaCierreMes = validarCierreMes($empresa,$fecha);
+  if($consultaCierreMes["exito"]){//Existe un cierre y no debe dejar registrar
+    $retorno["exito"] = 0;
+    $retorno["mensaje"] = 'Este mes ya se encuentra cerrado';
+    echo(json_encode($retorno));
+    die();
   }
   
   $fk_idusu = @$_SESSION["idusu"];
@@ -473,10 +505,7 @@ function obtener_bolsillos($empresa=false,$seleccionado=false,$return = 0){
     }
 }
 
-if(@$_REQUEST["ejecutar"]){
-  $_REQUEST["ejecutar"]();
-}
-function obtener_gastos_ingresos_egresos(){
+function obtener_gastos_ingresos_egresos($retornoFinal = false){
   global $conexion, $atras;
   $ingresoBanco = 0;
   $ingresoEfectivo = 0;
@@ -604,6 +633,11 @@ function obtener_gastos_ingresos_egresos(){
   
   $saldoTotal = ((($ingresoEfectivo + $ingresoBanco) - ($egresoEfectivo + $egresoBanco)) + $saldoInicialEfectivo + $saldoInicialBanco) - $totalBolsillo1;
   
+  $retorno["saldo_total"] = $saldoTotal;
+  $retorno["total_efectivo"] = $totalEfectivo;
+  $retorno["total_banco"] = $totalBanco;
+  $retorno["bolsillos"] = $bolsillos;
+  
   $html = '';
   $html .= '
           <div class="tab-pane fade ' . $capa1Show . '" id="capa_datos" role="tabpanel" aria-labelledby="capa_datos-tab">
@@ -691,6 +725,228 @@ function obtener_gastos_ingresos_egresos(){
     $retorno["fecha"] = date('Y-m-d');
   }
   
+  if(!$retornoFinal){
+    echo(json_encode($retorno));
+  } else {
+    return($retorno);
+  }
+}
+function cierre_mes_guardar(){
+  global $conexion;
+  $retorno = array();
+  $retorno["exito"] = 1;
+  
+  $idemp = @$_REQUEST["empresa"];
+  $ano = @$_REQUEST["ano"];
+  $mes = @$_REQUEST["mes"];
+  $fechai = @$_REQUEST["fechai"];
+  $fechaf = @$_REQUEST["fechaf"];
+  
+  $fechaHoy = date('Y-m-d H:i:s');
+  $fk_idusu = @$_SESSION["idusu"];
+  
+  $sqlConsultaCierre = "select * from cierre_mes a where a.fk_idemp=" . $idemp . " and a.ano=" . $ano . " and a.mes=" . $mes . "";
+  $datosConsultaCierre = $conexion -> listar_datos($sqlConsultaCierre);
+  if($datosConsultaCierre["cant_resultados"]){
+    $retorno["exito"] = 0;
+    $retorno["mensaje"] = "Ya se ha registrado este cierre";
+    echo(json_encode($retorno));
+    die();
+  }
+  
+  
+  $saldos = obtener_gastos_ingresos_egresos(true);
+  
+  $sqlGrupoIngreso = "select * from grupo where lower(nombre) like 'ingreso'";
+  $datosGrupoIngreso = $conexion -> listar_datos($sqlGrupoIngreso);
+  if(!$datosGrupoIngreso["cant_resultados"]){
+    $retorno["exito"] = 0;
+    $retorno["mensaje"] = "El grupo con nombre ingreso no existe";
+    echo(json_encode($retorno));
+    die();
+  }
+  
+  $sqlCategoriaInicial = "select * from categoria a where a.fk_idemp=" . $idemp . " and a.fk_idgru=" . $datosGrupoIngreso[0]["idgru"] . " and lower(a.nombre) like 'saldo inicial'";
+  $datosCategoriaInicial = $conexion -> listar_datos($sqlCategoriaInicial);
+  if(!$datosCategoriaInicial["cant_resultados"]){
+    $retorno["exito"] = 0;
+    $retorno["mensaje"] = "La categoría con nombre saldo inicial no existe para esta empresa y grupo";
+    echo(json_encode($retorno));
+    die();
+  }
+  
+  if($saldos["total_efectivo"] && $saldos["total_efectivo"] > 0){    
+    $nuevaFecha = $conexion -> sumar_fecha($fechai,1,'month','Y-m-d');
+    
+    $valores = array();
+    $valores["fk_idemp"] = $idemp;
+    $valores["fecha"] = $nuevaFecha;
+    $valores["grupo"] = $datosGrupoIngreso[0]["idgru"];
+    $valores["categoria"] = $datosCategoriaInicial[0]["idcat"];
+    $valores["concepto"] = 'Saldo mes anterior';
+    $valores["valor"] = $saldos["total_efectivo"];
+    $valores["tipo"] = 1;
+    $valores["tipo_pago"] = 1;//Efectivo
+    $valores["fk_idbol"] = 0;
+    
+    $resultadoEfectivo = insertar_ingreso_egreso_auto($valores);
+    if(!$resultadoEfectivo["exito"]){
+      $retorno["exito"] = 0;
+      $retorno["mensaje"] = "Problemas al insertar el total de efectivo saldo inicial";
+      echo(json_encode($retorno));
+      die();
+    }
+  }
+  if($saldos["total_banco"] && $saldos["total_banco"] > 0){
+    $nuevaFecha = $conexion -> sumar_fecha($fechai,1,'month','Y-m-d');
+    
+    $valores = array();
+    $valores["fk_idemp"] = $idemp;
+    $valores["fecha"] = $nuevaFecha;
+    $valores["grupo"] = $datosGrupoIngreso[0]["idgru"];
+    $valores["categoria"] = $datosCategoriaInicial[0]["idcat"];
+    $valores["concepto"] = 'Saldo mes anterior';
+    $valores["valor"] = $saldos["total_banco"];
+    $valores["tipo"] = 1;
+    $valores["tipo_pago"] = 2;//Banco
+    $valores["fk_idbol"] = 0;
+    
+    $resultadoBanco = insertar_ingreso_egreso_auto($valores);
+    if(!$resultadoBanco["exito"]){
+      $retorno["exito"] = 0;
+      $retorno["mensaje"] = "Problemas al insertar el total de banco saldo inicial";
+      echo(json_encode($retorno));
+      die();
+    }
+  }
+  
+  //------------------------------Bolsillos
+  $sqlGrupoSaldoInicialBolsillo = "select * from grupo where lower(nombre) like 'saldo inicial bolsillo'";
+  $datosGrupoSaldoInicialBolsillo = $conexion -> listar_datos($sqlGrupoSaldoInicialBolsillo);
+  if(!$datosGrupoSaldoInicialBolsillo["cant_resultados"]){
+    $retorno["exito"] = 0;
+    $retorno["mensaje"] = "El grupo con nombre saldo inicial bolsillo no existe";
+    echo(json_encode($retorno));
+    die();
+  }
+  
+  $sqlCategoriaBolsilloInicial = "select * from categoria a where a.fk_idemp=" . $idemp . " and a.fk_idgru=" . $datosGrupoSaldoInicialBolsillo[0]["idgru"] . " and lower(a.nombre) like 'saldo inicial%'";
+  $datosCategoriaBolsilloInicial = $conexion -> listar_datos($sqlCategoriaBolsilloInicial);
+  if(!$datosCategoriaBolsilloInicial["cant_resultados"]){
+    $retorno["exito"] = 0;
+    $retorno["mensaje"] = "La categoría con nombre saldo inicial no existe para esta empresa y grupo";
+    echo(json_encode($retorno));
+    die();
+  }
+  
+  if($saldos["bolsillos"]){
+    $valorBolsillos = 0;
+    foreach ($saldos["bolsillos"] as $idbol => $valor) {
+      $valores = array();
+      $valores["fk_idemp"] = $idemp;
+      $valores["fecha"] = $nuevaFecha;
+      $valores["grupo"] = $datosGrupoSaldoInicialBolsillo[0]["idgru"];
+      $valores["categoria"] = $datosCategoriaBolsilloInicial[0]["idcat"];
+      $valores["concepto"] = 'Saldo mes anterior';
+      $valores["valor"] = $valor;
+      $valores["tipo"] = 5;
+      $valores["tipo_pago"] = 1;//Efectivo
+      $valores["fk_idbol"] = $idbol;
+      
+      $resultadoBolsillo = insertar_ingreso_egreso_auto($valores);
+      if(!$resultadoBanco["exito"]){
+        $retorno["exito"] = 0;
+        $retorno["mensaje"] = "Problemas al insertar el total de algun bolsillo";
+        echo(json_encode($retorno));
+        die();
+      }
+      
+      $valorBolsillos += $valor;
+    }
+  }
+  
+  $campos = array('fk_idemp','ano','mes','fecha_cierre','fk_idusu','valor_saldo','valor_bolsillo');
+  $valores = array();
+  $valores[] = $idemp;
+  $valores[] = $ano;
+  $valores[] = $mes;
+  $valores[] = "date_format('" . $fechaHoy . "', '%Y-%m-%d %H:%i:%s')";
+  $valores[] = $fk_idusu;
+  $valores[] = ($saldos["total_efectivo"] + $saldos["total_banco"]);
+  $valores[] = ($valorBolsillos);
+  
+  $resultado = $conexion -> insertar('cierre_mes',$campos,$valores);
+  if($resultado){
+    $infoCierre = info_cierre_mes(true);
+    
+    $retorno["idcie"] = $resultado;
+    $retorno["html"] = $infoCierre["html"];
+  } else {
+    $retorno["exito"] = 0;
+    $retorno["mensaje"] = "Error al insertar";
+  }
+  
   echo(json_encode($retorno));
 }
-?>  
+function insertar_ingreso_egreso_auto($valores){
+  global $conexion;
+  $retorno = array();
+  $retorno["exito"] = 1;
+  
+  $fechaHoy = date('Y-m-d H:i:s');
+  $fk_idusu = @$_SESSION["idusu"];
+  
+  $campos_insertar = array('fk_idemp', 'fecha', 'fk_idgru', 'fk_idcat', 'concepto', 'valor', 'tipo', 'tipo_pago', 'fecha_creacion', 'fk_idusu', 'fk_idbol');
+  $valores_insertar = array();
+  $valores_insertar[] = $valores["fk_idemp"];
+  $valores_insertar[] = "date_format('" . $valores["fecha"] . "', '%Y-%m-%d')";
+  $valores_insertar[] = $valores["grupo"];
+  $valores_insertar[] = $valores["categoria"];
+  $valores_insertar[] = "'" . $valores["concepto"] . "'";
+  $valores_insertar[] = "'" . $valores["valor"] . "'";
+  $valores_insertar[] = $valores["tipo"];
+  $valores_insertar[] = $valores["tipo_pago"];
+  $valores_insertar[] = "date_format('" . $fechaHoy . "', '%Y-%m-%d %H:%i:%s')";
+  $valores_insertar[] = $fk_idusu;
+  $valores_insertar[] = $valores["fk_idbol"];
+  
+  $resultado = $conexion -> insertar('ingreso_egreso',$campos_insertar,$valores_insertar);
+  if($resultado){
+    $retorno["iding"] = $resultado;
+  } else {
+    $retorno["exito"] = 0;
+    $retorno["mensaje"] = "Error al insertar";
+  }
+  
+  return($retorno);
+}
+function info_cierre_mes($retornoFinal = false){
+  global $conexion;
+  $retorno = array();
+  $retorno["exito"] = 1;
+  
+  $idemp = @$_REQUEST["empresa"];
+  $ano = @$_REQUEST["ano"];
+  $mes = @$_REQUEST["mes"];
+  $fechai = @$_REQUEST["fechai"];
+  $fechaf = @$_REQUEST["fechaf"];
+  
+  $sqlConsultaCierre = "select * from cierre_mes a where a.fk_idemp=" . $idemp . " and a.ano=" . $ano . " and a.mes=" . $mes . "";
+  $datosConsultaCierre = $conexion -> listar_datos($sqlConsultaCierre);
+  
+  if($datosConsultaCierre["cant_resultados"]){
+    $retorno["html"] = '<button class="btn btn-success btn-icon-text"><i class="mdi mdi-file-check btn-icon-append"></i> Mes cerrado</button>';
+  } else {
+    $retorno["html"] = '<button class="btn btn-danger btn-icon-text cerrar_mes"><i class="mdi mdi-file-check btn-icon-append"></i> Cerrar mes</button>';
+  }
+  
+  if(!$retornoFinal){
+    echo(json_encode($retorno));
+  } else {
+    return($retorno);
+  }
+}
+if(@$_REQUEST["ejecutar"]){
+  $_REQUEST["ejecutar"]();
+}
+?>

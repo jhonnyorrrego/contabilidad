@@ -9,6 +9,8 @@ function obtener_tipo($tipo){
     $cadena = 'TRASLADO';
   } else if($tipo == 4){
     $cadena = 'BOLSILLO';
+  } else if($tipo == 5){
+    $cadena = 'SALDO INICIAL BOLSILLO';
   }
   
   return($cadena);
@@ -46,10 +48,18 @@ function parsear_valor_ingreso_egreso($valor,$tipo,$categoria){
   }
   return($cadena);
 }
-function accion_ingreso_egreso($iding){
+function accion_ingreso_egreso($iding,$fecha,$empresa){
+  global $conexion;
+  $datosFecha = explode("-",$fecha);
+  $consultaCierre = "select count(*) as cant from cierre_mes a where a.fk_idemp=" . $empresa . " and a.ano=" . $datosFecha[0] . " and a.mes=" . intval($datosFecha[1]) . " and a.estado=1";
+  $datosConsultaCierre = $conexion -> listar_datos($consultaCierre);
+  
   $cadena = '';
-  $cadena .= "<button class='btn btn-sm editar_ingreso_egreso' idingreso_egreso='" . $iding . "' title='Editar registro'><i class='mdi mdi-lead-pencil'></i></button>";
-  $cadena .= "<button class='btn btn-sm eliminar_ingreso_egreso' iding='" . $iding . "'><i class='mdi mdi-delete'></i></button>";
+  
+  if(!$datosConsultaCierre[0]["cant"]){
+    $cadena .= "<button class='btn btn-sm editar_ingreso_egreso' idingreso_egreso='" . $iding . "' title='Editar registro'><i class='mdi mdi-lead-pencil'></i></button>";
+    $cadena .= "<button class='btn btn-sm eliminar_ingreso_egreso' iding='" . $iding . "'><i class='mdi mdi-delete'></i></button>";
+  }
   
   return($cadena);
 }

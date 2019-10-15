@@ -59,7 +59,7 @@ if($campo_ordenar){
   $order .= "order by fecha asc";
 }
 
-$sql = "select a.iding,b.nombre as empresa,date_format(a.fecha,'%Y-%m-%d') as fecha,c.nombre as categoria,d.nombre as grupo,a.concepto,a.valor,a.tipo,a.tipo_pago,a.fk_idbol from ingreso_egreso a, empresa b, categoria c, grupo d where a.estado=1 and a.fk_idemp=b.idemp and a.fk_idcat=c.idcat and a.fk_idgru=d.idgru " . implode("",$where_contenedor) . " " . $order;
+$sql = "select a.iding,b.nombre as empresa,a.fk_idemp,date_format(a.fecha,'%Y-%m-%d') as fecha,c.nombre as categoria,d.nombre as grupo,a.concepto,a.valor,a.tipo,a.tipo_pago,a.fk_idbol from ingreso_egreso a, empresa b, categoria c, grupo d where a.estado=1 and a.fk_idemp=b.idemp and a.fk_idcat=c.idcat and a.fk_idgru=d.idgru " . implode("",$where_contenedor) . " " . $order;
 $datos = $conexion -> listar_datos($sql,$inicio,$cantidad);
 
 $arreglo = array();
@@ -80,7 +80,7 @@ for($i=0;$i<$datos["cant_resultados"];$i++){
   $datos[$i]["tipo"]=(obtener_tipo($datos[$i]["tipo"]));
   $datos[$i]["tipo_pago"]=(obtener_tipo_pago($datos[$i]["tipo_pago"]));
   $datos[$i]["bolsillo"]=(obtener_bolsillo($datos[$i]["fk_idbol"]));
-  $datos[$i]["accion"]=(accion_ingreso_egreso($datos[$i]["iding"])); 
+  $datos[$i]["accion"]=(accion_ingreso_egreso($datos[$i]["iding"],$datos[$i]["fecha"],$datos[$i]["fk_idemp"])); 
 }
 //----------------
 

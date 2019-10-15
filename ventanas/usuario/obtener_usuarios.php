@@ -23,6 +23,28 @@ $order = "";
 $where_contenedor = array();
 $hoy = date('Y-m-d');
 
+if(@$_REQUEST["tipo_filtro"]){
+  $where_contenedor[] = ' and a.tipo in (' . implode(",",@$_REQUEST["tipo_filtro"]) . ')';
+}
+if(@$_REQUEST["identificacion_filtro"]){
+  $where_contenedor[] = " and a.identificacion like '%" . $_REQUEST["identificacion_filtro"] . "%'";
+}
+if(@$_REQUEST["nombres_filtro"]){
+  $where_contenedor[] = " and a.nombres like '%" . $_REQUEST["nombres_filtro"] . "%'";
+}
+if(@$_REQUEST["apellido_filtro"]){
+  $where_contenedor[] = " and a.apellidos like '%" . $_REQUEST["apellido_filtro"] . "%'";
+}
+if(@$_REQUEST["email_filtro"]){
+  $where_contenedor[] = " and a.email like '%" . $_REQUEST["email_filtro"] . "%'";
+}
+if(@$_REQUEST["celular_filtro"]){
+  $where_contenedor[] = " and a.celular like '%" . $_REQUEST["celular_filtro"] . "%'";
+}
+if(@$_REQUEST["estado_filtro"]){
+  $where_contenedor[] = ' and a.estado in (' . implode(",",@$_REQUEST["estado_filtro"]) . ')';
+}
+
 if($campo_ordenar){
 	$order .= "order by " . $campo_ordenar . " " . $asc_desc;
 }
@@ -38,13 +60,13 @@ if($search){
 	$where_contenedor[] = " and (" . implode(" or ", $where_search) . ")";
 }
 
-$sql = "select idusu, identificacion, nombres, apellidos, email, celular, tipo, estado, date_format(fecha,'%Y-%m-%d') as x_fecha from usuario where 1=1 " . implode("",$where_contenedor) . " " . $order;
+$sql = "select idusu, identificacion, nombres, apellidos, email, celular, tipo, estado, date_format(fecha,'%Y-%m-%d') as x_fecha from usuario a where 1=1 " . implode("",$where_contenedor) . " " . $order;
 $datos = $conexion -> listar_datos($sql,$inicio,$cantidad);
 
 $arreglo = array();
 
 //Obteniendo el total de registros de la consulta
-$sql_cantidad = "select count(*) as cantidad from usuario where 1=1 " . implode("",$where_contenedor);
+$sql_cantidad = "select count(*) as cantidad from usuario a where 1=1 " . implode("",$where_contenedor);
 $datos_cantidad = $conexion -> listar_datos($sql_cantidad);
 $arreglo["total"] = $datos_cantidad[0]["cantidad"];
 //-----

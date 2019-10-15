@@ -103,6 +103,15 @@ $().ready(function() {
 			});
 		}
 	});
+	
+	$(document).on('change','input[name$="tipo_filtro[]"],input[name$="estado_filtro[]"]',function(){
+    procesamiento_listar();
+  });
+  $("#identificacion_filtro,#nombres_filtro,#apellido_filtro,#email_filtro,#celular_filtro").keyup(function(){
+    setTimeout(function(){
+      procesamiento_listar();
+    }, 100);
+  });
 });
 </script>
 
@@ -186,8 +195,74 @@ $().ready(function() {
     <div class="card">
       <div class="card-body">
         <p class="card-title">Lista usuarios</p>
+        
+        <p>
+          <a data-toggle="collapse" href="#collapseExample" role="button" aria-expanded="false" aria-controls="collapseExample">
+            + Filtros
+          </a>
+        </p>
+        
+        <div class="collapse" id="collapseExample">
+          <form class="row" name="filtro_usuario" id="filtro_usuario" onsubmit="return false;">              
+              <div class="col-md-3 form-group">
+                  <label class="">Tipo de usuario</label>                    
+                  <div class="form-check form-check-primary">
+                    <label class="form-check-label">
+                      <input type="checkbox" class="form-check-input tipo_filtro" name="tipo_filtro[]" id="tipo_filtro1" value="1" texto="Cliente">
+                      Cliente
+                    <i class="input-helper"></i></label>
+                  </div>
+                  <div class="form-check form-check-primary">
+                    <label class="form-check-label">
+                      <input type="checkbox" class="form-check-input tipo_filtro" name="tipo_filtro[]" id="tipo_filtro2" value="2" texto="Administrador">
+                      Administrador
+                    <i class="input-helper"></i></label>
+                  </div>
+              </div>
+              
+              <div class="col-md-3 form-group">
+                <label class="">Identificaci&oacute;n</label>
+                <input type="number" id="identificacion_filtro" name="identificacion_filtro" class="form-control form-control-sm number" pattern="[0-9]*">
+              </div>
+
+              <div class="col-md-3 form-group">
+                  <label class="">Nombres</label>
+                    <input type="text" id="nombres_filtro" name="nombres_filtro" class="form-control form-control-sm">
+              </div>
+              <div class="col-md-3 form-group">
+                  <label class="">Apellidos</label>
+                  <input type="text" id="apellido_filtro" name="apellido_filtro" class="form-control form-control-sm">
+              </div>
+              <div class="col-md-3 form-group">
+                  <label class="">Email</label>
+                  <input type="text" id="email_filtro" name="email_filtro" class="form-control form-control-sm email">
+              </div>
+              <div class="col-md-3 form-group">
+                  <label class="">Celular</label>
+                  <input type="text" id="celular_filtro" name="celular_filtro" class="form-control form-control-sm">
+              </div>
+              
+              <div class="col-md-3 form-group">
+                  <label class="">Estado</label>                    
+                  <div class="form-check form-check-primary">
+                    <label class="form-check-label">
+                      <input type="checkbox" class="form-check-input estado_filtro" name="estado_filtro[]" id="estado_filtro1" value="1" texto="Activo">
+                      Activo
+                    <i class="input-helper"></i></label>
+                  </div>
+                  <div class="form-check form-check-primary">
+                    <label class="form-check-label">
+                      <input type="checkbox" class="form-check-input estado_filtro" name="estado_filtro[]" id="estado_filtro2" value="2" texto="Inactivo">
+                      Inactivo
+                    <i class="input-helper"></i></label>
+                  </div>
+              </div>
+            
+          </form>
+        </div>
+        
         <div class="table-responsive">
-          <table id="table" class="table" role="grid" style="width: 100%">
+          <table id="table" class="table table-bordered table-responsive-md table-striped text-center" role="grid" style="width: 100%">
             <thead class="">
               <tr>
                 <th data-field="identificacion" data-sortable="true" data-visible="true">Identificacion</th>
@@ -211,7 +286,7 @@ $().ready(function() {
 <script>
 $body = $("body");
 
-var cantidad_registros = 10;
+var cantidad_registros = 1000;
 $(document).ready(function(){//Se inicializa la tabla con estilos, el alto del documento y se ejecuta la accion para listar datos sobre la tabla
   var alto_documento = $(document).height();
   var alto_tabla = <?php echo($alto_tabla); ?>;
@@ -262,11 +337,7 @@ $(document).ready(function(){//Se inicializa la tabla con estilos, el alto del d
 function procesamiento_listar(){
   var alto_documento = $(document).height();
 
-  var data = $('#form_table').serializeObject();
-  
-  $('#table').bootstrapTable('getOptions').sidePagination = 'client';
-  $('#table').bootstrapTable('selectPage', 1);
-  $('#table').bootstrapTable('getOptions').sidePagination = 'server';
+  var data = $('#filtro_usuario').serializeObject();
   
   $('#table').bootstrapTable('refreshOptions', {
     url: 'obtener_usuarios.php',
@@ -295,11 +366,16 @@ function procesamiento_listar(){
       var altoTabla = $("#table").height();
 
       <?php if(@$_SESSION["dispositivo"] == 'computer'){ ?>
+      setTimeout(function(){
+        $('#table').bootstrapTable('resetView' , {height: altoTabla+100} );
+        //$(document).scrollTop( $('#capa_ingreso_egreso_list').offset().top -80 );        
+      }, 500);
       
       <?php } ?>
       <?php if(@$_SESSION["dispositivo"] == 'phone'){ ?>
       setTimeout(function(){
         $('#table').bootstrapTable('resetView' , {height: altoTabla+150} );
+        //$(document).scrollTop( $('#capa_ingreso_egreso_list').offset().top -80 );
       }, 500);
       <?php } ?>
     }
@@ -327,6 +403,10 @@ $.fn.serializeObject = function(){
     });
     return o;
 };
+
+$(".redimensionar").click(function(){
+   setTimeout(function(){ $('#table').bootstrapTable('resetWidth'); }, 500);
+});
 </script>
 <?php echo(pie()); ?>
 <?php include_once($atras . "ventanas/usuario/librerias_reporte_usuarios_js.php"); ?>

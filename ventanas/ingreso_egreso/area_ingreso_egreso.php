@@ -124,6 +124,7 @@ $(document).ready(function(){
     if(valor){
       procesar_categorias();
       procesar_categorias_filtro();
+      procesar_cierre_mes();
       
       $.ajax({
         url: 'ejecutar_acciones.php',
@@ -148,16 +149,12 @@ $(document).ready(function(){
     procesar_capa_info_ingreso_egreso();
   });
   
-  $("#ano").change(function(){
+  $("#ano,#mes").change(function(){
     procesarFiltrosFechas();
     
     procesar_capa_info_ingreso_egreso();
-    procesamiento_listar();
-  });
-  $("#mes").change(function(){
-    procesarFiltrosFechas();
     
-    procesar_capa_info_ingreso_egreso();
+    procesar_cierre_mes();
     procesamiento_listar();
   });
   
@@ -236,6 +233,38 @@ $(document).ready(function(){
     }
     
     procesamiento_listar();
+  });
+  
+  $(document).on('click',".cierre_mes",function(){
+    var x_idemp = $("#empresa").val();
+    var x_fechai = $("#fechai").val();
+    var x_fechaf = $("#fechaf").val();
+    var x_ano = $("#ano").val();
+    var x_mes = $("#mes").val();
+    
+    if(!x_idemp || !x_ano || !x_mes){
+      notificacion('Se deben llenar como minimo la empresa, año y mes','warning',4000);
+      return false;
+    }
+    
+    if(!confirm('Esta seguro de cerrar mes?')){
+      return false;
+    }
+    
+    $.ajax({
+      url : 'ejecutar_acciones.php',
+      type: 'POST',
+      dataType: 'json',
+      async : false,
+      data: {ejecutar: 'cierre_mes_guardar', empresa: x_idemp, fechai: x_fechai, fechaf: x_fechaf, ano: x_ano, mes: x_mes},
+      success : function(respuesta){
+        if(respuesta.exito){
+          $("#capa_cierre_mes").html(respuesta.html);
+        } else {
+          notificacion(respuesta.mensaje,'warning',4000);
+        }
+      }
+    });
   });
   
   $(".descargar_reporte").click(function(){
@@ -334,6 +363,32 @@ function procesar_categorias_filtro(){
   }
 }
 
+function procesar_cierre_mes(){
+  var x_idemp = $("#empresa").val();
+  var x_fechai = $("#fechai").val();
+  var x_fechaf = $("#fechaf").val();
+  var x_ano = $("#ano").val();
+  var x_mes = $("#mes").val();
+  
+  if(!x_idemp || !x_ano || !x_mes){
+    //notificacion('Se deben llenar como minimo la empresa, año y mes','warning',4000);
+    return false;
+  }
+  
+  $.ajax({
+      url: 'ejecutar_acciones.php',
+      type: 'POST',
+      dataType: 'json',
+      async: false,
+      data: {ejecutar: 'info_cierre_mes', empresa: x_idemp, fechai: x_fechai, fechaf: x_fechaf, ano: x_ano, mes: x_mes},
+      success : function(respuesta){
+        if(respuesta.exito){
+          $("#capa_cierre_mes").html(respuesta.html);
+        }
+      }
+  });
+}
+
 $(document).on('keydown', function(event) {
    if (event.key == "Escape") {
       $(".valores").each(function(){
@@ -367,8 +422,9 @@ $(document).on('keydown', function(event) {
           <h2>Área de trabajo</h2>
         </div>
       </div>
-      <div class="d-flex justify-content-between align-items-end flex-wrap">
-        <button class="btn btn-primary mt-2 mt-xl-0 descargar_reporte">Descargar reporte</button>
+      <div class="d-flex justify-content-between align-items-end flex-wrap btn-group" role="group">
+        <div id="capa_descargar_reporte"><button class="btn btn-primary descargar_reporte"><i class="mdi mdi-printer btn-icon-append"></i> Descargar reporte</button></div>
+        <div id="capa_cierre_mes"></div>
       </div>
     </div>
   </div>
