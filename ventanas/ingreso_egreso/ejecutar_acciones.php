@@ -937,7 +937,7 @@ function info_cierre_mes($retornoFinal = false){
   if($datosConsultaCierre["cant_resultados"]){
     $retorno["html"] = '<button class="btn btn-success btn-icon-text"><i class="mdi mdi-file-check btn-icon-append"></i> Mes cerrado</button>';
   } else {
-    $retorno["html"] = '<button class="btn btn-danger btn-icon-text cerrar_mes"><i class="mdi mdi-file-check btn-icon-append"></i> Cerrar mes</button>';
+    $retorno["html"] = '<button class="btn btn-danger btn-icon-text cierre_mes"><i class="mdi mdi-file-check btn-icon-append"></i> Cerrar mes</button>';
   }
   
   if(!$retornoFinal){
