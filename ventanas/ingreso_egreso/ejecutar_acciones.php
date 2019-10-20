@@ -775,7 +775,7 @@ function cierre_mes_guardar(){
     die();
   }
   
-  if($saldos["total_efectivo"] && $saldos["total_efectivo"] > 0){    
+  if($saldos["total_efectivo"]){    
     $nuevaFecha = $conexion -> sumar_fecha($fechai,1,'month','Y-m-d');
     
     $valores = array();
@@ -797,7 +797,7 @@ function cierre_mes_guardar(){
       die();
     }
   }
-  if($saldos["total_banco"] && $saldos["total_banco"] > 0){
+  if($saldos["total_banco"]){
     $nuevaFecha = $conexion -> sumar_fecha($fechai,1,'month','Y-m-d');
     
     $valores = array();
