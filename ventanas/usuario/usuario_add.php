@@ -127,13 +127,13 @@ $().ready(function() {
       					<label class="">Identificaci&oacute;n*</label>
       					<input type="number" id="identificacion" name="identificacion" class="form-control form-control-sm required number" pattern="[0-9]*">
         			</div>
-        			<div class="col-md-3 form-group" style="display:none">
+        			<div class="col-md-3 form-group">
         			   <label class="">Clave*</label>
-        				<input type="password" id="clave" name="clave" class="form-control form-control-sm">
+        				<input type="password" id="clave" name="clave" class="form-control form-control-sm required">
         			</div>
-        			<div class="col-md-3 form-group" style="display:none">
+        			<div class="col-md-3 form-group">
         					<label class="">Repita su clave*</label>
-        					<input type="password" id="clave2" class="form-control form-control-sm" equalTo="#clave">
+        					<input type="password" id="clave2" class="form-control form-control-sm required" equalTo="#clave">
         			</div>
         			<div class="col-md-3 form-group">
         					<label class="">Nombres*</label>
