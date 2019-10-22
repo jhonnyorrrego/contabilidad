@@ -44,6 +44,8 @@ $(document).on('click','#actualizar_categoria_formulario',function(){
           notificacion(resultado.mensaje,'success',5000);
           
           procesamiento_listar();
+          
+          $("#cancelar_actualizar_categoria_formulario").click();
         }else{
           notificacion(resultado.mensaje,'warning',5000);
         }

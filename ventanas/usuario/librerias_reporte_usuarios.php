@@ -2,9 +2,9 @@
 function tipo_usuario_funcion($tipo){
 	$cadena = "";
 	if($tipo == 1){
-		$cadena = "Cliente";
+		$cadena = "GENERAL";
 	}else if($tipo == 2){
-		$cadena = "Administrador";
+		$cadena = "ADMINISTRADOR";
 	}
 	return($cadena);
 }

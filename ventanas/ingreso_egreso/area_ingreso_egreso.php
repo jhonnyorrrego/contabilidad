@@ -85,9 +85,6 @@ $(document).ready(function(){
         var otraCategoria = confirm("Esta seguro de vincular esta nueva categoria?");
         if(!otraCategoria){
           return false;
-        } else {
-          $("#otra_categoria").hide();
-          $("#otra_categoria").val("");
         }
       }
     }
@@ -107,6 +104,8 @@ $(document).ready(function(){
           
           $("#concepto").val("");
           $("#valor").val("");
+          $("#otra_categoria").hide();
+          $("#otra_categoria").val("");
           if(x_categoria == -1){
             $("#empresa").trigger("change");
           }
@@ -162,6 +161,9 @@ $(document).ready(function(){
     var valor = $(this).val();
     if(valor == -1){
       $("#otra_categoria").show();
+      $("#otra_categoria").focus();
+    } else {
+      $("#otra_categoria").hide();
     }
   });
   
@@ -174,6 +176,7 @@ $(document).ready(function(){
       $("#capa_adicionar_categoria").hide();
       $("#capa_concepto").hide();
       $("#capa_tipo_pago").hide();
+      $("#capa_bolsillo").hide();
       
       $("#capa_traslado_a").show();
     } else if(x_valor == 6){//Saldo inicial bolsillo
@@ -184,6 +187,7 @@ $(document).ready(function(){
       $("#capa_bolsillo").show();
     } else {
       $("#capa_traslado_a").hide();
+      $("#capa_bolsillo").hide();
       
       $("#capa_adicionar_categoria").show();
       $("#capa_concepto").show();
@@ -523,7 +527,7 @@ for($i=0;$i<12;$i++){
         <h4 class="card-title">Realizar Ingreso</h4>
         <form class="" onsubmit="return false;" name="form_ingreso_egreso" id="form_ingreso_egreso">
           <div class="row">
-            <div class="form-group col-md-2">
+            <div class="form-group col-md-1">
               <label>Fecha*</label>
               <input type="text" class="form-control form-control-sm " id="fecha" readonly="" value="">
             </div>
@@ -537,12 +541,12 @@ echo($cadenaGrupo["opciones_adicionar"]);
                 </div>
             </div>
             
-            <div id="capa_adicionar_categoria" class="form-group col-md-1">
+            <div id="capa_adicionar_categoria" class="form-group col-md-2">
               <label for="exampleFormControlSelect1">Categoría*</label>
               <select class="form-control form-control-sm " id="categoria">
                 <option value="">Seleccione</option>
               </select>
-              <input type="text" class="form-control form-control-sm mt-2" style="display:none" placeholder="Otra categoria" id="otra_categoria">
+              <textarea class="form-control form-control-sm mt-2" style="display:none" placeholder="Otra categoria" id="otra_categoria" rows="6"></textarea>
             </div>
             
             <div id="capa_concepto" class="form-group col-md-2">
@@ -613,11 +617,13 @@ echo($cadenaGrupo["opciones_adicionar"]);
       <div class="card-body">
         <p class="card-title">Datos ingresados</p>
         
-        <p>
-          <a data-toggle="collapse" href="#collapseExample" role="button" aria-expanded="false" aria-controls="collapseExample">
-            + Filtros
-          </a>
-        </p>
+        <a data-toggle="collapse" href="#collapseExample" role="button" aria-expanded="false" aria-controls="collapseExample" class="btn btn-mini">
+          <i class="mdi mdi-filter"></i> Filtros
+        </a>
+        
+        <button class="btn btn-mini limpiar_filtro">
+          <i class="mdi mdi-filter-outline "></i> Limpiar filtros
+        </button>
         
         <div class="collapse" id="collapseExample">
           <form class="row" name="filtro_ingreso_egreso2" id="filtro_ingreso_egreso2" onsubmit="return false;">
@@ -713,6 +719,15 @@ echo($cadenaGrupo["opciones_filtro"]);
 
 <script>
 $(document).ready(function(){  
+  $(".limpiar_filtro").click(function(){
+    $("#filtro_ingreso_egreso2").find('input:radio, input:checkbox').removeAttr('checked').removeAttr('selected');
+    
+    jQuery('#filtro_ingreso_egreso2').each(function(){
+      this.reset();
+    });
+    
+    procesamiento_listar();
+  });
   $('#fechai').datepicker({
     language : 'es',
     format: 'yyyy-mm-dd',

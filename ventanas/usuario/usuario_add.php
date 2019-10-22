@@ -65,26 +65,6 @@ $().ready(function() {
 		}
 	});
 	
-	$("#tipo").change(function(){
-		var tipo = $(this).val();
-		if(tipo == 2){//
-			$("#clave").addClass("required");
-			$("#clave").parent().show(200);
-			
-			$("#clave2").addClass("required");
-			$("#clave2").parent().show(200);
-		} else {
-			$("#clave").removeClass("required");
-			$("#clave").val("");
-			$("#clave").parent().hide(200);
-			
-			$("#clave2").removeClass("required");
-			$("#clave2").val("");
-			$("#clave2").parent().hide(200);
-			
-		}
-	});
-	
 	$("#identificacion").blur(function(){
 		var x_identificacion = $("#identificacion").val();
 		if(identificacion){
@@ -138,7 +118,7 @@ $().ready(function() {
 	                <label>Tipo de usuario</label>
 	                <select class="form-control form-control-sm" id="tipo" name="tipo">
 	                	<option value="">Tipo de usuario</option>
-        						<option value="1" selected>Cliente</option>
+        						<option value="1" selected>General</option>
         						<option value="2">Administrador</option>
 	                </select>
 	            </div>
@@ -196,11 +176,13 @@ $().ready(function() {
       <div class="card-body">
         <p class="card-title">Lista usuarios</p>
         
-        <p>
-          <a data-toggle="collapse" href="#collapseExample" role="button" aria-expanded="false" aria-controls="collapseExample">
-            + Filtros
-          </a>
-        </p>
+        <a data-toggle="collapse" href="#collapseExample" role="button" aria-expanded="false" aria-controls="collapseExample" class="btn btn-mini">
+          <i class="mdi mdi-filter"></i> Filtros
+        </a>
+        
+        <button class="btn btn-mini limpiar_filtro">
+            <i class="mdi mdi-filter-outline "></i> Limpiar filtros
+        </button>
         
         <div class="collapse" id="collapseExample">
           <form class="row" name="filtro_usuario" id="filtro_usuario" onsubmit="return false;">              
@@ -222,7 +204,7 @@ $().ready(function() {
               
               <div class="col-md-3 form-group">
                 <label class="">Identificaci&oacute;n</label>
-                <input type="number" id="identificacion_filtro" name="identificacion_filtro" class="form-control form-control-sm number" pattern="[0-9]*">
+                <input type="text" id="identificacion_filtro" name="identificacion_filtro" class="form-control form-control-sm number">
               </div>
 
               <div class="col-md-3 form-group">
@@ -288,6 +270,16 @@ $body = $("body");
 
 var cantidad_registros = 1000;
 $(document).ready(function(){//Se inicializa la tabla con estilos, el alto del documento y se ejecuta la accion para listar datos sobre la tabla
+  $(".limpiar_filtro").click(function(){    
+    $("#filtro_usuario").find('input:radio, input:checkbox').removeAttr('checked').removeAttr('selected');
+    
+    jQuery('#filtro_usuario').each(function(){
+      this.reset();
+    });
+    
+    procesamiento_listar();
+  });
+  
   var alto_documento = $(document).height();
   var alto_tabla = <?php echo($alto_tabla); ?>;
 

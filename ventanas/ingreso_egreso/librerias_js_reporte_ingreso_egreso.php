@@ -86,9 +86,6 @@ $(document).on('click', "#actualizar_ingreso_egreso_formulario", function(){
       var otraCategoria = confirm("Esta seguro de vincular esta nueva categoria?");
       if(!otraCategoria){
         return false;
-      } else {
-        $("#otra_categoria_edit").hide();
-        $("#otra_categoria_edit").val("");
       }
     }
   }
@@ -109,6 +106,11 @@ $(document).on('click', "#actualizar_ingreso_egreso_formulario", function(){
         if(x_categoria == -1){
           $("#empresa").trigger("change");
         }
+        
+        $("#otra_categoria_edit").hide();
+        $("#otra_categoria_edit").val("");
+        
+        $("#cancelar_actualizar_ingreso_egreso_formulario").click();
       } else {
         notificacion(respuesta.mensaje,'warning',4000);
       }
@@ -148,6 +150,9 @@ $(document).on('change', '#categoria_edit', function(){
     var valor = $(this).val();
     if(valor == -1){
       $("#otra_categoria_edit").show();
+      $("#otra_categoria_edit").focus();
+    } else {
+      $("#otra_categoria_edit").hide();
     }
   });
   
@@ -163,6 +168,7 @@ function procesar_grupo_edit(){
     $("#capa_categoria_edit").hide();
     $("#capa_concepto_edit").hide();
     $("#capa_tipo_pago_edit").hide();
+    $("#capa_bolsillo_edit").hide();
     
     $("#capa_traslado_a_edit").show();
   } else if(x_valor == 6){//Saldo inicial bolsillo
@@ -173,6 +179,7 @@ function procesar_grupo_edit(){
       $("#capa_bolsillo_edit").show();
   } else {
     $("#capa_traslado_a_edit").hide();
+    $("#capa_bolsillo_edit").hide();
     
     $("#capa_categoria_edit").show();
     $("#capa_concepto_edit").show();

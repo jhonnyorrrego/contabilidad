@@ -18,27 +18,7 @@ $(document).ready(function(){
     <iframe class="modal-content" id="pantallas_usuarios" name="pantallas_usuarios" border="0px" frameborder="0"></iframe>
   </div>
 </div>
-<script>
-$(document).on('change','#tipo_edit',function(){
-  var tipo = $(this).val();
-  if(tipo == 2){//
-    $("#clave_edit").addClass("required");
-    $("#clave_edit").parent().show(200);
-    
-    $("#clave2_edit").addClass("required");
-    $("#clave2_edit").parent().show(200);
-  } else {
-    $("#clave_edit").removeClass("required");
-    $("#clave_edit").val("");
-    $("#clave_edit").parent().hide(200);
-    
-    $("#clave2_edit").removeClass("required");
-    $("#clave2_edit").val("");
-    $("#clave2_edit").parent().hide(200);
-    
-  }
-});
-  
+<script>  
 $(document).on('click','.editar_usuario',function(){
 	var idusuario = $(this).attr("idusuario");
 	
@@ -81,6 +61,8 @@ $(document).on('click','#actualizar_usuario_formulario',function(){
           notificacion(resultado.mensaje,'success',5000);
           
           procesamiento_listar();
+          
+          $("#cancelar_actualizar_usuario_formulario").click();
         }else{
           notificacion(resultado.mensaje,'warning',5000);
         }

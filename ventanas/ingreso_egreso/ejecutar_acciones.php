@@ -150,7 +150,7 @@ function mostrar_actualizar_ingreso_egreso_formulario(){
         <h4 class="card-title">Actualizar Ingreso</h4>
         <form class="" onsubmit="return false;" name="form_ingreso_egreso_edit" id="form_ingreso_egreso_edit">
           <div class="row">
-            <div class="form-group col-md-2">
+            <div class="form-group col-md-1">
               <label>Fecha*</label>
               <input type="text" class="form-control form-control-sm " id="fecha_edit" readonly="" value="' . $datos[0]["fecha"] . '">
             </div>
@@ -160,12 +160,12 @@ function mostrar_actualizar_ingreso_egreso_formulario(){
                 </div>
             </div>
             
-            <div id="capa_categoria_edit" class="form-group col-md-1">
+            <div id="capa_categoria_edit" class="form-group col-md-2">
               <label for="exampleFormControlSelect1">Categoría*</label>
               <select class="form-control form-control-sm " id="categoria_edit">
                 ' . $categorias["opciones"] . '
               </select>
-              <input type="text" class="form-control form-control-sm mt-2" style="display:none" placeholder="Otra categoria" id="otra_categoria_edit">
+              <textarea class="form-control form-control-sm mt-2" style="display:none" placeholder="Otra categoria" id="otra_categoria_edit" rows="6"></textarea>
             </div>
             
             <div id="capa_concepto_edit" class="form-group col-md-2">

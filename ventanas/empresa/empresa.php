@@ -133,11 +133,13 @@ $().ready(function() {
       <div class="card-body">
         <p class="card-title">Lista empresas</p>
         
-        <p>
-          <a data-toggle="collapse" href="#collapseExample" role="button" aria-expanded="false" aria-controls="collapseExample">
-            + Filtros
-          </a>
-        </p>
+        <a data-toggle="collapse" href="#collapseExample" role="button" aria-expanded="false" aria-controls="collapseExample" class="btn btn-mini">
+          <i class="mdi mdi-filter"></i> Filtros
+        </a>
+        
+        <button class="btn btn-mini limpiar_filtro">
+          <i class="mdi mdi-filter-outline "></i> Limpiar filtros
+        </button>
         
         <div class="collapse" id="collapseExample">
           <form class="row" name="filtro_empresa" id="filtro_empresa" onsubmit="return false;">
@@ -210,6 +212,16 @@ $body = $("body");
 
 var cantidad_registros = 1000;
 $(document).ready(function(){//Se inicializa la tabla con estilos, el alto del documento y se ejecuta la accion para listar datos sobre la tabla
+  $(".limpiar_filtro").click(function(){
+    $("#filtro_empresa").find('input:radio, input:checkbox').removeAttr('checked').removeAttr('selected');
+    
+    jQuery('#filtro_empresa').each(function(){
+      this.reset();
+    });
+    
+    procesamiento_listar();
+  });
+  
   var alto_documento = $(document).height();
   var alto_tabla = <?php echo($alto_tabla); ?>;
 

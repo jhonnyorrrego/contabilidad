@@ -86,7 +86,7 @@ function mostrar_actualizar_usuario_formulario(){
                   <label>Tipo de usuario</label>
                   <select class="form-control form-control-sm" id="tipo_edit" name="tipo">
                     <option value="">Tipo de usuario</option>              
-                    <option value="1" ' . $tipoCliente . '>Cliente</option>
+                    <option value="1" ' . $tipoCliente . '>General</option>
                     <option value="2" ' . $tipoAdmin . '>Administrador</option>
                   </select>
               </div>
@@ -95,12 +95,12 @@ function mostrar_actualizar_usuario_formulario(){
                 <label class="">Identificaci&oacute;n*</label>
                 <input type="number" id="identificacion_edit" name="identificacion" class="form-control form-control-sm required number" pattern="[0-9]*" value="' . $datosUsuario[0]["identificacion"] . '">
               </div>
-              <div class="col-md-3 form-group" style="' . $capaClave . '">
-                 <label class="">Clave*</label>
+              <div class="col-md-3 form-group">
+                 <label class="">Clave</label>
                 <input type="password" id="clave_edit" name="clave" class="form-control form-control-sm">
               </div>
-              <div class="col-md-3 form-group" style="' . $capaClave . '">
-                  <label class="">Repita su clave*</label>
+              <div class="col-md-3 form-group">
+                  <label class="">Repita su clave</label>
                   <input type="password" id="clave2_edit" class="form-control form-control-sm" equalTo="#clave_edit">
               </div>
               <div class="col-md-3 form-group">
