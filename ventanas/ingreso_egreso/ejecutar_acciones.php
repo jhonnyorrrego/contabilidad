@@ -549,10 +549,10 @@ function obtener_gastos_ingresos_egresos($retornoFinal = false){
     $whereFiltro[] = " and a.fk_idemp=0";
   }
   if($fechai){
-    $whereFiltro[] = " and date_format(a.fecha,'%Y-%m-%d %H:%i:%s')>='" . $fechai . "'";
+    $whereFiltro[] = " and date_format(a.fecha,'%Y-%m-%d')>='" . $fechai . "'";
   }
   if($fechaf){
-    $whereFiltro[] = " and date_format(a.fecha,'%Y-%m-%d %H:%i:%s')<='" . $fechaf . "'";
+    $whereFiltro[] = " and date_format(a.fecha,'%Y-%m-%d')<='" . $fechaf . "'";
   }
   
   if($capaActiva == 'capa_datos-tab'){
