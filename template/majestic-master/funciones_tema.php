@@ -83,6 +83,9 @@ function encabezado(){
                 <?php if($conexion -> validar_permiso_perfil('permisos')){ ?>
                 <li class="nav-item"> <a class="nav-link" href="<?php echo($atras); ?>ventanas/permiso/permiso.php"> Permisos </a></li>
                 <?php } ?>
+                <?php if($conexion -> validar_permiso_perfil('perfiles')){ ?>
+                <li class="nav-item"> <a class="nav-link" href="<?php echo($atras); ?>ventanas/perfil/perfil.php"> Perfiles </a></li>
+                <?php } ?>
                 <?php if($conexion -> validar_permiso_perfil('permiso_perfl')){ ?>
                 <li class="nav-item"> <a class="nav-link" href="<?php echo($atras); ?>ventanas/permiso_perfil/permiso_perfil.php"> Asignación de permisos </a></li>
                 <?php } ?>
