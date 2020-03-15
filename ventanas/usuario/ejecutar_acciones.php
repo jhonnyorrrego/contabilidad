@@ -59,12 +59,6 @@ function mostrar_actualizar_usuario_formulario(){
   $tipoAdmin = '';
   
   $capaClave = 'display:none';
-  if($datosUsuario[0]["tipo"] == 1){
-    $tipoCliente = 'selected';
-  } else if($datosUsuario[0]["tipo"] == 2){
-    $tipoAdmin = 'selected';
-    $capaClave = '';
-  }
   
   $estadoActivo = '';
   $estadoInacctivo = '';
@@ -72,6 +66,15 @@ function mostrar_actualizar_usuario_formulario(){
     $estadoActivo = 'selected';
   } else if($datosUsuario[0]["estado"] == 2){
     $estadoInacctivo = 'selected';
+  }
+  
+  $perfiles = $conexion -> listar_datos('select idper,etiqueta from perfil order by etiqueta asc');
+  for ($i=0; $i < $perfiles["cant_resultados"]; $i++) {
+    $adicionalPerfil = '';
+    if($perfiles[$i]["idper"] == $datosUsuario[0]["tipo"]){
+      $adicionalPerfil = 'selected';
+    }
+    $opcionesPerfl .= "<option value='" . $perfiles[$i]["idper"] . "' " . $adicionalPerfil . ">" . $perfiles[$i]["etiqueta"] . "</option>";
   }
   
   $html = '';
@@ -86,8 +89,7 @@ function mostrar_actualizar_usuario_formulario(){
                   <label>Tipo de usuario</label>
                   <select class="form-control form-control-sm" id="tipo_edit" name="tipo">
                     <option value="">Tipo de usuario</option>              
-                    <option value="1" ' . $tipoCliente . '>General</option>
-                    <option value="2" ' . $tipoAdmin . '>Administrador</option>
+                    ' . $opcionesPerfl . '
                   </select>
               </div>
 

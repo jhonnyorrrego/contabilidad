@@ -118,8 +118,13 @@ $().ready(function() {
 	                <label>Tipo de usuario</label>
 	                <select class="form-control form-control-sm" id="tipo" name="tipo">
 	                	<option value="">Tipo de usuario</option>
-        						<option value="1" selected>General</option>
-        						<option value="2">Administrador</option>
+<?php
+$sql = "select idper,etiqueta from perfil where estado=1 order by etiqueta asc";
+$empresas = $conexion -> listar_datos($sql);
+for ($i=0; $i < $empresas["cant_resultados"]; $i++) { 
+  echo("<option value='" . $empresas[$i]["idper"] . "'>" . $empresas[$i]["etiqueta"] . "</option>");
+}
+?>
 	                </select>
 	            </div>
 
@@ -187,19 +192,17 @@ $().ready(function() {
         <div class="collapse" id="collapseExample">
           <form class="row" name="filtro_usuario" id="filtro_usuario" onsubmit="return false;">              
               <div class="col-md-3 form-group">
-                  <label class="">Tipo de usuario</label>                    
-                  <div class="form-check form-check-primary">
-                    <label class="form-check-label">
-                      <input type="checkbox" class="form-check-input tipo_filtro" name="tipo_filtro[]" id="tipo_filtro1" value="1" texto="Cliente">
-                      Cliente
-                    <i class="input-helper"></i></label>
-                  </div>
-                  <div class="form-check form-check-primary">
-                    <label class="form-check-label">
-                      <input type="checkbox" class="form-check-input tipo_filtro" name="tipo_filtro[]" id="tipo_filtro2" value="2" texto="Administrador">
-                      Administrador
-                    <i class="input-helper"></i></label>
-                  </div>
+                  <label class="">Tipo de usuario</label>                                      
+<?php
+for ($i=0; $i < $empresas["cant_resultados"]; $i++) { 
+  echo('<div class="form-check form-check-primary">
+          <label class="form-check-label">
+            <input type="checkbox" class="form-check-input tipo_filtro" name="tipo_filtro[]" id="tipo_filtro' . $empresas[$i]["idper"] . '" value="' . $empresas[$i]["idper"] . '" texto="' . $empresas[$i]["etiqueta"] . '">
+            ' . $empresas[$i]["etiqueta"] . '
+          <i class="input-helper"></i></label>
+        </div>');
+}
+?>
               </div>
               
               <div class="col-md-3 form-group">
