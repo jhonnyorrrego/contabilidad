@@ -62,7 +62,7 @@ $().ready(function() {
   $(document).on('change','input[name$="fk_idemp_filtro[]"],input[name$="estado_filtro[]"]',function(){
     procesamiento_listar();
   });
-  $("#nombre_filtro,#etiqueta_filtro,#observaciones_filtro").keyup(function(){
+  $("#etiqueta_filtro").keyup(function(){
     setTimeout(function(){
       procesamiento_listar();
     }, 100);
@@ -88,22 +88,11 @@ $().ready(function() {
       <div class="card-body">
         <h4 class="card-title">Crear perfil</h4>
         <form class="" name="perfil_add" id="perfil_add">
-          <div class="row">
-              <div class="col-md-3 form-group">
-                <label class="">Nombre*</label>
-                <input type="text" id="nombre" name="nombre" class="form-control form-control-sm required">
-              </div>
-              
+          <div class="row">              
               <div class="col-md-3 form-group">
                 <label class="">Etiqueta*</label>
                 <input type="text" id="etiqueta" name="etiqueta" class="form-control form-control-sm required">
-              </div>
-              
-              <div class="col-md-3 form-group">
-                <label class="">Observaciones</label>
-                <textarea style="height:100px" id="observaciones" name="observaciones" class="form-control form-control-sm"></textarea>
-              </div>
-              
+              </div>              
               <div class="col-md-3 form-group">
                   <label class="">Estado*</label>
                   <select class="form-control form-control-sm required" id="estado" name="estado">
@@ -138,23 +127,11 @@ $().ready(function() {
         </button>
         
         <div class="collapse" id="collapseExample">
-          <form class="row" name="filtro_perfil" id="filtro_perfil" onsubmit="return false;">
-              
-              <div class="col-md-3 form-group">
-                <label class="">Nombre</label>
-                <input type="text" id="nombre_filtro" name="nombre_filtro" class="form-control form-control-sm">
-              </div>
-              
+          <form class="row" name="filtro_perfil" id="filtro_perfil" onsubmit="return false;">              
               <div class="col-md-3 form-group">
                 <label class="">Etiqueta</label>
                 <input type="text" id="etiqueta_filtro" name="etiqueta_filtro" class="form-control form-control-sm">
-              </div>
-              
-              <div class="col-md-3 form-group">
-                <label class="">Observaciones</label>
-                <textarea style="height:100px" id="observaciones_filtro" name="observaciones_filtro" class="form-control form-control-sm"></textarea>
-              </div>
-              
+              </div>              
               <div class="col-md-3 form-group">
                   <label class="">Estado</label>                    
                   <div class="form-check form-check-primary">
@@ -177,9 +154,7 @@ $().ready(function() {
           <table id="table" class="table table-bordered table-responsive-md table-striped text-center" role="grid" style="width: 100%">
             <thead class="">
               <tr>
-                <th data-field="nombre" data-sortable="true" data-visible="true">Nombre</th>
                 <th data-field="etiqueta" data-sortable="false" data-visible="true">Etiqueta</th>
-                <th data-field="observaciones" data-sortable="false" data-visible="true">Observaciones</th>
                 <th data-field="estado_funcion" data-sortable="false" data-visible="true">Estado</th>
                 <th data-field="acciones_perfil" data-sortable="false" data-visible="true"></th>
               </tr>
