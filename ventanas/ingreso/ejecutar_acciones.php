@@ -19,37 +19,30 @@ function validar_ingreso(){
 	$sql = "select * from usuario a where a.estado=1 and a.identificacion='" . $identificacion . "'";
 	$datos_usuario = $conexion -> listar_datos($sql);
 	if($datos_usuario["cant_resultados"]){
-		if($datos_usuario[0]["tipo"] == 2){
-			$clave_db = $datos_usuario[0]["clave"];
-			if(metodo_encriptar($clave) == $clave_db){
-				$retorno["exito"] = 1;
-				$retorno["mensaje"] = 'Bienvenido';
+		$clave_db = $datos_usuario[0]["clave"];
+		if(metodo_encriptar($clave) == $clave_db){
+			$retorno["exito"] = 1;
+			$retorno["mensaje"] = 'Bienvenido';
 
-				$conexion -> iniciar_variables_sesiones($datos_usuario);
+			$conexion -> iniciar_variables_sesiones($datos_usuario);
+      
+      if($recordar == 'true'){
+        mt_srand(time());
+        $rand = mt_rand(1000000,9999999);
         
-        if($recordar == 'true'){
-          mt_srand(time());
-          $rand = mt_rand(1000000,9999999);
-          
-          setcookie("usuario_contabilidad", $identificacion, time()+(60*60*24*365));
-          setcookie("clave_contabilidad", $clave, time()+(60*60*24*365));
-        } else {
-          setcookie("usuario_contabilidad", '', time()-100);
-          setcookie("clave_contabilidad", '', time()-100);
-          unset($_COOKIE['usuario_contabilidad']);
-          unset($_COOKIE['clave_contabilidad']);
-        }
+        setcookie("usuario_contabilidad", $identificacion, time()+(60*60*24*365));
+        setcookie("clave_contabilidad", $clave, time()+(60*60*24*365));
+      } else {
+        setcookie("usuario_contabilidad", '', time()-100);
+        setcookie("clave_contabilidad", '', time()-100);
+        unset($_COOKIE['usuario_contabilidad']);
+        unset($_COOKIE['clave_contabilidad']);
+      }
 
-				echo(json_encode($retorno));
-			} else {
-				$retorno["exito"] = 0;
-				$retorno["mensaje"] = 'Clave erronea';
-
-				echo(json_encode($retorno));
-			}
+			echo(json_encode($retorno));
 		} else {
 			$retorno["exito"] = 0;
-			$retorno["mensaje"] = 'Debes ser administrador';
+			$retorno["mensaje"] = 'Clave erronea';
 
 			echo(json_encode($retorno));
 		}

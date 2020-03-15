@@ -1,6 +1,6 @@
 <?php
 function encabezado(){
-	global $atras;
+	global $atras, $conexion;
 	?>
 <!doctype html>
 <html class="no-js h-100" lang="es">
@@ -51,12 +51,15 @@ function encabezado(){
       <!-- partial:partials/_sidebar.html -->
       <nav class="sidebar sidebar-offcanvas" id="sidebar">
         <ul class="nav">
+          <?php if($conexion -> validar_permiso_perfil('area_trabajo')){ ?>
           <li class="nav-item">
             <a class="nav-link" href="<?php echo($atras); ?>ventanas/ingreso_egreso/area_ingreso_egreso.php">
               <i class="mdi mdi-home menu-icon"></i>
               <span class="menu-title">Área de trabajo</span>
             </a>
           </li>
+          <?php } ?>
+          <?php if($conexion -> validar_permiso_perfil('administracion')){ ?>
           <li class="nav-item">
             <a class="nav-link" data-toggle="collapse" href="#auth" aria-expanded="false" aria-controls="auth">
               <i class="mdi mdi-settings menu-icon"></i>
@@ -65,13 +68,28 @@ function encabezado(){
             </a>
             <div class="collapse" id="auth">
               <ul class="nav flex-column sub-menu">
+                <?php if($conexion -> validar_permiso_perfil('usuarios')){ ?>
                 <li class="nav-item"> <a class="nav-link" href="<?php echo($atras); ?>ventanas/usuario/usuario_add.php"> Usuarios </a></li>
+                <?php } ?>
+                <?php if($conexion -> validar_permiso_perfil('empresas')){ ?>
                 <li class="nav-item"> <a class="nav-link" href="<?php echo($atras); ?>ventanas/empresa/empresa.php"> Empresas </a></li>
+                <?php } ?>
+                <?php if($conexion -> validar_permiso_perfil('categorias')){ ?>
                 <li class="nav-item"> <a class="nav-link" href="<?php echo($atras); ?>ventanas/categoria/categoria.php"> Categorias </a></li>
+                <?php } ?>
+                <?php if($conexion -> validar_permiso_perfil('bolsillos')){ ?>
                 <li class="nav-item"> <a class="nav-link" href="<?php echo($atras); ?>ventanas/bolsillo/bolsillo.php"> Bolsillos </a></li>
+                <?php } ?>
+                <?php if($conexion -> validar_permiso_perfil('permisos')){ ?>
+                <li class="nav-item"> <a class="nav-link" href="<?php echo($atras); ?>ventanas/permiso/permiso.php"> Permisos </a></li>
+                <?php } ?>
+                <?php if($conexion -> validar_permiso_perfil('permiso_perfl')){ ?>
+                <li class="nav-item"> <a class="nav-link" href="<?php echo($atras); ?>ventanas/permiso_perfil/permiso_perfil.php"> Asignación de permisos </a></li>
+                <?php } ?>
               </ul>
             </div>
           </li>
+          <?php } ?>
         </ul>
       </nav>
       <!-- partial -->

@@ -813,6 +813,23 @@ class lib_gym{
 				return "diciembre";
 		}
 	}
+  public function validar_permiso_perfil($nombre){
+    $sqlPerfilUsuario = "select b.etiqueta from usuario a, perfil b where a.tipo=b.idper and idusu=" . $_SESSION["idusu"];
+    $datosPerfilUsuario = $this -> listar_datos($sqlPerfilUsuario);
+    
+    if($datosPerfilUsuario[0]["etiqueta"] == 'Administrador'){
+      return true;
+    }
+    
+    $sqlPermisoPerfil = "select count(*) as cant from permiso_perfil a, permiso b where a.fk_idperm=b.idper and b.nombre='" . $nombre . "' and a.estado=1";
+    $datosPermisoPerfil = $this -> listar_datos($sqlPermisoPerfil);
+    
+    if($datosPermisoPerfil[0]["cant"]){
+      return true;
+    } else {
+      return false;
+    }
+  }
 	public function iniciar_variables_sesiones($datos){
 		$_SESSION["usuario" . LLAVE_SESION] = $datos[0]["identificacion"];
 		$_SESSION["tipo"] = $datos[0]["tipo"];
@@ -821,17 +838,6 @@ class lib_gym{
 		$_SESSION["apellidos"] = $datos[0]["apellidos"];
 	}
 	public function validar_acceso_sesion(){
-		global $atras;
-		if(!@$_SESSION["idusu"] || @$_SESSION["tipo"] == 1){
-			?>
-			<script>
-			window.location = '<?php echo($atras); ?>ventanas/ingreso/salir.php';
-			</script>
-			<?php
-			die();
-		}
-	}
-	public function validar_acceso_consulta_sesion(){
 		global $atras;
 		if(!@$_SESSION["idusu"]){
 			?>
