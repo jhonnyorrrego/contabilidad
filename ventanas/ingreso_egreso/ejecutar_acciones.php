@@ -775,6 +775,25 @@ function cierre_mes_guardar(){
     die();
   }
   
+  //------------------------------Bolsillos
+  $sqlGrupoSaldoInicialBolsillo = "select * from grupo where lower(nombre) like 'saldo inicial bolsillo'";
+  $datosGrupoSaldoInicialBolsillo = $conexion -> listar_datos($sqlGrupoSaldoInicialBolsillo);
+  if(!$datosGrupoSaldoInicialBolsillo["cant_resultados"]){
+    $retorno["exito"] = 0;
+    $retorno["mensaje"] = "El grupo con nombre saldo inicial bolsillo no existe";
+    echo(json_encode($retorno));
+    die();
+  }
+  
+  $sqlCategoriaBolsilloInicial = "select * from categoria a where a.fk_idemp=" . $idemp . " and a.fk_idgru=" . $datosGrupoSaldoInicialBolsillo[0]["idgru"] . " and lower(a.nombre) like 'saldo inicial%'";
+  $datosCategoriaBolsilloInicial = $conexion -> listar_datos($sqlCategoriaBolsilloInicial);
+  if(!$datosCategoriaBolsilloInicial["cant_resultados"]){
+    $retorno["exito"] = 0;
+    $retorno["mensaje"] = "La categoría con nombre saldo inicial no existe para esta empresa y grupo " . $datosGrupoSaldoInicialBolsillo[0]["nombre"];
+    echo(json_encode($retorno));
+    die();
+  }
+  
   if($saldos["total_efectivo"]){    
     $nuevaFecha = $conexion -> sumar_fecha($fechai,1,'month','Y-m-d');
     
@@ -818,25 +837,6 @@ function cierre_mes_guardar(){
       echo(json_encode($retorno));
       die();
     }
-  }
-  
-  //------------------------------Bolsillos
-  $sqlGrupoSaldoInicialBolsillo = "select * from grupo where lower(nombre) like 'saldo inicial bolsillo'";
-  $datosGrupoSaldoInicialBolsillo = $conexion -> listar_datos($sqlGrupoSaldoInicialBolsillo);
-  if(!$datosGrupoSaldoInicialBolsillo["cant_resultados"]){
-    $retorno["exito"] = 0;
-    $retorno["mensaje"] = "El grupo con nombre saldo inicial bolsillo no existe";
-    echo(json_encode($retorno));
-    die();
-  }
-  
-  $sqlCategoriaBolsilloInicial = "select * from categoria a where a.fk_idemp=" . $idemp . " and a.fk_idgru=" . $datosGrupoSaldoInicialBolsillo[0]["idgru"] . " and lower(a.nombre) like 'saldo inicial%'";
-  $datosCategoriaBolsilloInicial = $conexion -> listar_datos($sqlCategoriaBolsilloInicial);
-  if(!$datosCategoriaBolsilloInicial["cant_resultados"]){
-    $retorno["exito"] = 0;
-    $retorno["mensaje"] = "La categoría con nombre saldo inicial no existe para esta empresa y grupo " . $datosGrupoSaldoInicialBolsillo[0]["nombre"];
-    echo(json_encode($retorno));
-    die();
   }
   
   if($saldos["bolsillos"]){
