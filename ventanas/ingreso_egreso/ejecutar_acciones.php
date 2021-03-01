@@ -834,7 +834,7 @@ function cierre_mes_guardar(){
   $datosCategoriaBolsilloInicial = $conexion -> listar_datos($sqlCategoriaBolsilloInicial);
   if(!$datosCategoriaBolsilloInicial["cant_resultados"]){
     $retorno["exito"] = 0;
-    $retorno["mensaje"] = "La categoría con nombre saldo inicial no existe para esta empresa y grupo";
+    $retorno["mensaje"] = "La categoría con nombre saldo inicial no existe para esta empresa y grupo " . $datosGrupoSaldoInicialBolsillo[0]["nombre"];
     echo(json_encode($retorno));
     die();
   }
@@ -872,8 +872,8 @@ function cierre_mes_guardar(){
   $valores[] = $mes;
   $valores[] = "date_format('" . $fechaHoy . "', '%Y-%m-%d %H:%i:%s')";
   $valores[] = $fk_idusu;
-  $valores[] = ($saldos["total_efectivo"] + $saldos["total_banco"]);
-  $valores[] = ($valorBolsillos);
+  $valores[] = "'" . ($saldos["total_efectivo"] + $saldos["total_banco"]) . "'";
+  $valores[] = "'" . ($valorBolsillos) . "'";
   
   $resultado = $conexion -> insertar('cierre_mes',$campos,$valores);
   if($resultado){
